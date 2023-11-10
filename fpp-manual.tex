@@ -10,6 +10,7 @@
 %
 \documentclass{hitec}     % Tutorial overall style
 
+\usepackage{biblatex}
 \usepackage{index}
 \usepackage{xr}
 \usepackage{textgreek}
@@ -35,12 +36,15 @@
 \usepackage[nottoc,numbib]{tocbibind}   % Makes "References" section show in table of contents
 \usepackage[pdftex,colorlinks=true,bookmarksnumbered=true]{hyperref}   % Must be last package!
 \usepackage{titletoc,tocloft}%
+
 \setlength{\cftsubsecindent}{1cm}
 \setlength{\cftsubsubsecindent}{2cm}
 %\dottedcontents{section}[1.5em]{}{1.3em}{.6em}
 %-------------------------------------------------------------------
 
 \input{macros.tex}
+
+\addbibresource{bibliography.bib}
 
 \definecolor{backcolor}{rgb}{0.8824,1.0,1.0}   % To match code environment
 \definecolor{h}{rgb}{0.8824,0.3,0.3} 
@@ -97,24 +101,36 @@
 \Section{Introduction to packages within FPP/PTC}
 \label{s:intro}
 
-The name PTC is commenly used to designate a code written by Etienne Forest with the help of Frank Schmidt and later David Sagan. However,  it is made of several parts. In particular, it is linked with the overloaded TPSA package of Martin Berz, called polymorphic package, (PP), via the creation of a derived type called \vn{real_8}.  It should become obvious to the reader that {\bf any} tracking code using PP is automatically ``a polymorphic tracking code'' or a ``PTC''.  In this manual, from now own,  we used PTC to refer specifically to the code you download from Cornell with Bmad---Forest's code.
-
-PTC is an object oriented package, open source, made of 3 separate entities. It stands for ``Polymorphic Tracking Code''. 
-
-\begin{enumerate}
-\item The tracking code itself (call it TC)  is where the physics of PTC is located. It is simply an integrator pushing the particles (phase space, spin and modulation) through magnets.  Via the magic of PP, a Taylor map can be produced if wanted out of TC.
-\item\label{it:fpp} The ``Polymorphic Package'' (the PP of FPP)   deals  with the production of Taylor series. It is completely void of physics.
-\item\label{it:ap}  The Analysis Package (AP)  analyses physically sensible Taylors maps: Taylor maps that approximate the tracking of the code. Spin and magnet modulation can also be analyzed. FPP is  the combination
-of items \ref{it:fpp} and \ref{it:ap}. The interaction with TC is described in section (\sref{s:extmap} ).
-\end{enumerate}
-
-
-The popularity of PTC can be attested to by its use with the Bmad\cite{b:Bmad} toolkit for
+The name PTC is commenly used to designate a code written by Etienne Forest with the help of Frank Schmidt and later David Sagan. PTC is an object oriented, open source, subroutine library for
+\begin{itemize}
+\item The manipulation and analysis of Taylor series and Taylor maps.
+\item Modeling of charged particle beams in accelerators using Taylor maps.
+\end{itemize}
+The popularity of PTC can be attested to by its use with the Bmad\cite{b:bmad} toolkit for
 accelerator and X-ray simulations as well as its use within the MAD\cite{b:mad} simulation program.
 
+PTC is linked with the overloaded Truncated Power Series
+Algebra (TPSA) package of Martin Berz. Berz's package is called \vn{Polymorphic Package} (PP). By
+virtue of using the polymorphic package and by virtue of being able to do tracking, PTC stands for
+``Polymorphic Tracking Code''. PTC is can be decomposed into two parts:
+\begin{enumerate}
+%
+\item The Fully Polymorphic Package (FPP) part handles Taylor series.
+FPP is pure mathematics detached from any "physics". 
+%
+\item The Tracking Code (TC) part is where the physics of PTC is located. It is simply an integrator pushing the phase space and spin of particles through magnets. 
+TC relies on FPP for handling Taylor series. In particular,
+via the magic of FPP (specifically the magic of PP), a Taylor map can be produced if wanted when tracking with TC.
+%
+\end{enumerate}
+
+FPP is the subject of this manual. FPP itself can be subdivided into two parts:
+\begin{enumerate}
+\item\label{it:fpp} The ``Polymorphic Package'' (the PP of FPP) deals with the production of Taylor series.
+\item\label{it:ap} The Analysis Package (AP) analyses physically sensible Taylors maps: Taylor maps that approximate the tracking of the code. Spin and magnet modulation can also be analyzed.
+\end{enumerate}
+
 To appreciate the role of PP, we can show a tiny piece of code  TC representing a drift.
-                  
-                  
 \begin{code}
                       .
                       .
@@ -145,10 +161,10 @@ is not discussed and the reader is referred to the PTC documentation for this.
 
 \begin{figure}[tb]
   \centering
-  \includegraphics[width=1.2\textwidth]{ptcfppe.pdf}
+  \includegraphics[width=0.9\textwidth]{ptcfppe.pdf}
   \caption{
 The Fully Polymorphic Package (FPP) part of the FPP/PTC library provides manipulation and analysis
-of Taylor series and maps and the  Tracking Code (TC) part contains  the physics of 
+of Taylor series and maps and the Tracking Code (TC) part contains the physics of 
  the  accelerators. Arrows indicate code dependencies. The Taylor analysis code uses
 the Taylor manipulation code but not vice versa. FPP does not use PTC but PTC code uses both FPP's
 Taylor manipulation and potentially analysis as the red arrow indicates.
@@ -3133,8 +3149,7 @@ Explain knobs
 
 \newpage
 
-\bibliography{bibliography}
-\bibliographystyle{ieeetr}
+%%\printbibliography
 
 \end{document}
 
