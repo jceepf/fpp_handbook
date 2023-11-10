@@ -1982,6 +1982,7 @@ The results are for the tunes, phase slip and the orbit:
 \end{code}
 
 
+
  \section{Normalizing a TPSA map}\label{s:normdatpsa}
  
  
@@ -2218,79 +2219,63 @@ TPSA  closed orbit  0.4576E-02 -0.8650E-05 -0.1701E-04 -0.4623E-04
   
  We see that the situation as improved and approaches the DA result.     It is not surprising that users of COSY-INFINITY must run at very higher order in rings. This is not necessary with a symplectic integrator provided all the maps are around the closed orbit, i.e., DA maps.
 %--------------------------------------------------------------------------------------------------------
-\Section{Taylor and Complex Taylor Fundamental Types}
+%--------------------------------------------------------------------------------------------------------
+\Section{Taylor and Complex Taylor Fundamental Types used in TC}
 \label{s:fundamental}
  
 The PP of FPP defines two fundamental structures that are the building blocks of many other structures:
-\vn{Taylor} and \vn{complextaylor}. The \vn{direct} use of either in a tracking program (that is,
-when doing simulations with PTC) is discouraged. Rather, other types like \vn{real_8} and \vn{complex_8}
+\vn{taylor} and \vn{complextaylor}. The \vn{direct} use of either \vn{taylor} or  \vn{complextaylor} in a tracking program (
+in a  simulation code like  TC) is highly discouraged. Polymorphic types like \vn{real_8} and \vn{complex_8}
 should be used.
 
-{\color{h}These are used  via the polymorphic types \vn{real_8} and \vn{complex_8} in the tracking code TC.}
-%--------------------------------------------------------------------------------------------------------
-\subsection{Initializing TPSA win FPP and PTC}
-\label{s:inittaylor}
+ \vn{taylor} and \vn{complextaylor} are used  via the polymorphic types \vn{real_8} and \vn{complex_8} in the tracking code TC. They are no longer used in AP. Indeed the analysis used in FPP uses the package \vn{c_dabnew.f90} which is a ``complexification'' of Berz's \vn{dabnew.f90}: it uses the complex Taylor \vn{c_taylor}. The glue between these two world is described in section (\sref{s:ptcmap}). These types delay the usage of a Taylor and this save memory: the program can decide during execution if a quantity is real or Taylor.
+ 
 
 
-FPP and PTC can function in two modes:
+ 
+ 
+ They are defined as follows:
+ 
+ \begin{code}
+type real_8
+ type (taylor) t ! used if taylor
+ real(dp) r ! used if real
+!
+ integer kind !  1,2,3 (1=real,2=taylor,3=taylor knob )
+ integer i ! used for knobs and special kind=0
+ real(dp) s ! scaling for knobs and special kind=0
+ logical(lp) :: alloc ! true if taylor is allocated in c_dabnew.f90 of Berz  
+end type real_8
 
-\begin{enumerate}
-\item Mode ignorant of accelerator phase space maps. In that case, FPP does not know what a normal form is. Dimension of \vn{c_damap} must be specified by the user. You are on your own. This is not recommended if you have an even dimension phase space that represents the dynamics of beams.
-\item You have maps of even dimensions with perhaps spin. FPP must know about this: happens with initialization.
-\end{enumerate}
+  
+type complex_8
+ type (complextaylor) t    -> t= t%r +i  t%i are 2 real taylors
+ complex(dp) r
+ logical(lp) alloc
+ integer kind
+ integer i,j
+ complex(dp) s
+end type complex_8
+ \end{code}
+ 
+ \subsection{The various Taylor Types}
+\label{s:taylorc}
 
-\subsubsection{Ignorant of PTC  initialization mode}
-\label{s:initigno}
-
-In the case of FPP, the following call must be performed:
-
-\begin{code}
-neq=4    ! number of equations to solve
-np=6     ! number of free parameters to solve these equations
-no=1; nv=NP+neq ;  ! nv=6+4=10
-
-call c_init_all(no,nv)   ! FPP command to initialize the TPSA
-
-call alloc(ct);call alloc(eq);  ! type c_taylor ct and eq(:)
-lagrange_map_ap%n=nv   ! type c_damap
-call alloc(lagrange_map_ap)  ! type c_damap 
-\end{code}
-
-This initialization of TPSA and AP creates \vn{nv} variables of order \vn{no}: there is no mention of maps. Thus the number of dimension of  \vn{lagrange_map_ap}, a  \vn{c_damap}, must be specified in \vn{lagrange_map_ap%n}. Here it has \vn{nv}  variables. 
-This number can be from  \vn{lagrange_map_ap%n=1} to \vn{lagrange_map_ap%n=nv}.
-Any attempt to normalized that map would lead to a crash.
-
-\subsubsection{Even dimension initialization mode}
-\label{s:initeven}
-
-\begin{code}
-neq=4    ! number of equations to solve
-np=6     ! number of free parameters to solve these equations
-no=1; nv=NP+neq ;  ! nv=6+4=10
-
-call c_init_all(no,nv)   ! FPP command to initialize the TPSA
-
-call alloc(ct);call alloc(eq);  ! type c_taylor ct and eq(:)
-lagrange_map_ap%n=nv   ! type c_damap
-call alloc(lagrange_map_ap)  ! type c_damap 
-\end{code}
-
-
-\subsection{Taylor Type}
+\subsubsection{Taylor Type}
 \label{s:taylor}
 
 The \vn{taylor} structure overloads the Taylor series of the original real ``DA-Package'' of
-Berz. See \sref{s:real8}. The structure is
+Berz.  The structure is
 \begin{code}
 type taylor
    integer i    ! Pointer to Berz
 end type taylor
 \end{code}
-The Berz package uses a positive integer to differentiate different Taylor series and the
+The Berz package \vn{dabnew.f90} uses a positive integer to point to different Taylor series and the
 \vn{taylor} structure just stores a reference integer.
 
 %--------------------------------------------------------------------------------------------------------
-\subsection{ComplexTaylor Type}
+\subsubsection{ComplexTaylor Type}
 \label{s:taylor}
 
 The \vn{complextaylor} structure stores two Taylor series which represent the real and imaginary parts.
@@ -2300,6 +2285,360 @@ type complextaylor
    type (taylor) r     ! Real part of complex Taylor series.
    type (taylor) i     ! Imaginary part of complex Taylor series.
 end type complextaylor
+\end{code}
+
+ \subsubsection{C_taylor Type}
+\label{s:ctaylor}
+
+The \vn{c_taylor} structure stores  Taylor series in the complexified version of Berz's TPSA package: \vn{c_dabnew.f90}. This type is used only in AP and in the glue between AP and TC. (See section  \sref{s:extmap})
+
+The structure is:
+\begin{code}
+type c_taylor
+ integer i ! integer i is a pointer to the complexified berz package
+end type c_taylor
+\end{code}   
+
+Everything that was said about \vn{taylor} in section (\sref{s:taylor}) applies to \vn{c_taylor} if one substitutes \vn{c_dabnew.f90} for Berz's package. In this new package, all the coefficients are \vn{complex(dp)}.
+
+ \subsection{Examples of the polymorphs  \vn{real_8}  and  \vn{complex_8} }\label{s:rc8}
+  
+ The Taylor series embedded in types \vn{real_8} and \vn{complex_8}, types \vn{taylor} and \vn{complextaylor} respectively, are all coming from the real package \vn{dabnew.f90} of Berz. 
+ 
+ A  polymorph can be an ordinary floating point number, a Taylor series from \vn{c_dabnew.f90}  or a knob which we will now describe. A knob is a latent  simple Taylor:
+ %
+%]|Expr|[#b @`b___})9# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|""*|:"t :!,F,] "#Times|:#t,Er ,K t,Es $^"$Symbol^:$&c0  D)&# b'4|
+%|:#&c0!*t,Ei,Knd2}& b!( b"0 b#8 b$@ b%H b&P!WW}_"%Monaco^:% : ;8/<|
+%|:";bP8eq,Zknobdef: ;8/=:!;bP8 : -;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} t\ &= t\%r\ +\ t\%s\ {\Delta }_{t\%i+nd2}~\label{eq:knobdef} \end{align}
+
+
+To understand these three instantiations of the \vn{real8/complex_8} types, we propose the  code \vn{z_track_real_8.f90}. Consider these fragments from the program  \vn{z_track_real_8.f90}:
+
+
+
+
+ 
+ 
+ \begin{enumerate}
+ \item\label{itc1} {\bf Creation of knobs}
+ 
+  \begin{code}
+p=>ring%start
+call move_to(ring,p,"QF1")   !  Locating QF1 in TC
+!  PP : making a Polymorph into a knob
+call make_it_knob(p%magp%bn(2),1)  
+p_QF1=>p
+call move_to(ring,p,"QF2")   ! Locating QF2 in TC
+call make_it_knob(p%magp%bn(2),2)   
+p_QF2=>p
+
+write(6,*);write(6,*) "Printing knob 1  "
+call print(p_QF1%magp%bn(2))
+write(6,*);write(6,*) "Printing knob 2  "
+call print(p_QF2%magp%bn(2))
+  \end{code}
+  
+ \item\label{itc2} {\bf Using knobs with no phase space}
+ 
+  \begin{code}
+write(6,*) "A polyphorm powered by a knob : FPP no phase space maps "
+x1=p_QF2%magp%bn(2)
+write(6,*) " x1 "
+call print(x1)
+x2=p_QF2%magp%bn(2)+i_*p_QF1%magp%bn(2)
+write(6,*) " x2"
+call print(x2,6)
+call kill(x1);call kill(x2);
+  \end{code}
+  
+ \item\label{itc3} {\bf Using knobs with phase space}
+ 
+  \begin{code}
+
+no=2
+nd=3
+np=2
+ndpt=0
+knob=.true. 
+call c_init_all(no,nd,np,ndpt)
+write(6,*) " Jordan Normal Form ", c_%ndpt
+
+call alloc(x1);call alloc(x2);
+
+ 
+
+write(6,*) "Taylors powered by a knob : FPP with phase space maps "
+x1=p_QF2%magp%bn(2)
+call print(x1)
+x2=p_QF2%magp%bn(2)+i_*p_QF1%magp%bn(2)
+call print(x2)
+call kill(x1);call kill(x2);
+  \end{code}
+  
+ \item\label{itc4} {\bf Using knobs with phase space via PTC}
+ 
+  \begin{code}
+call in_bmad_units()
+bmad_state=default+time0      !+nocavity0
+
+call init_all(bmad_state,no,np)
+write(6,*) " Jordan Normal Form ", c_%ndpt
+
+
+call alloc(x1);call alloc(x2);
+
+call print(bmad_state)
+ 
+
+write(6,*) "Taylors created by a knob : PTC with phase space maps "
+x1=p_QF2%magp%bn(2)
+call print(x1)
+x2=p_QF2%magp%bn(2)+i_*p_QF1%magp%bn(2)
+call print(x2)
+  \end{code}
+  
+ \item\label{itc5} {\bf Ignoring knobs PTC}
+ 
+  \begin{code}
+knob=.false.
+write(6,*) "Knobs are ignored "
+
+x1=p_QF2%magp%bn(2)
+call print(x1)
+x2=p_QF2%magp%bn(2)+i_*p_QF1%magp%bn(2)
+call print(x2)
+
+call kill(x1);call kill(x2);
+
+  \end{code}
+  
+ \item\label{itc6} {\bf Removing knobs permanently}
+ 
+  \begin{code}
+write(6,*) "Knobs are eliminated "
+knob=.true.  
+if(p_QF1%magp%bn(2)%kind==3) p_QF1%magp%bn(2)%kind=1
+if(p_QF2%magp%bn(2)%kind==3) p_QF2%magp%bn(2)%kind=1
+x1=p_QF2%magp%bn(2)
+call print(x1)
+x2=p_QF2%magp%bn(2)+i_*p_QF1%magp%bn(2)
+call print(x2)
+
+
+  \end{code}
+  
+
+ 
+  \end{enumerate}
+ 
+%--------------------------------------------------------------------------------------------------------
+\subsubsection{Initializing a polymorph: fragment \ref{itc1} }
+\label{s:inittaylor}
+
+
+All polymorphs must be initialized prior to their usage: this done with the call
+\begin{code}
+   call alloc(x1} 
+\end{code}
+or in the depth of PTC by 
+
+ \begin{code}
+   subroutine zero_anbn_p(el,n)
+    implicit none
+    type(elementp), intent(inout) ::el
+    integer, intent(in) ::n
+
+    if(n<=0) return
+    if(associated(el%an)) deallocate(el%an)
+    if(associated(el%bn)) deallocate(el%bn)
+    el%p%nmul=n
+    allocate(el%an(el%p%nmul),el%bn(el%p%nmul))
+    call alloc(el%an,el%p%nmul);    ! polymorphic an constructed
+    call alloc(el%bn,el%p%nmul);    ! polymorphic bn constructed
+
+  end subroutine zero_anbn_p
+\end{code}
+
+This allocation is done, in the case of \vn{an,bn}, prior to any call to the TPSA package. Polymorphs can be allocated as soon as the space in memory exists.
+
+Next we create two knobs, for example,
+
+\begin{code}
+p=>ring%start
+call move_to(ring,p,"QF1")   !  Locating QF1 in TC
+!  PP : making a Polymorph into a knob
+call make_it_knob(p%magp%bn(2),1)  
+p_QF1=>p
+\end{code}
+
+This implies tthat the quadrupole component \vn{bn(2)} of the magnet QF1 can become the $nd2+1$ variable of a Taylor series. If we run the code of item \ref{itc1}, we get:
+
+\begin{code}
+ Printing knob 1
+  printing a real polymorph (real_8)
+2.25384743526091+1.00000000000000(x_1)
+
+ Printing knob 2
+  printing a real polymorph (real_8)
+2.24740000000000+1.00000000000000(x_2)
+\end{code}
+
+This shows that the two polymorphs are latent Taylor series consistent with \Eq{eq:knobdef}. Now we see how that is actualized in a real code.
+
+\subsubsection{Knobs with no phase space: item \ref{itc2}}
+\label{s:initigno}
+
+
+ Also the TPSA package must be initialized otherwise the code will not know the values $no$ and  $nv$: remember that the code tracks an element of the algebra $\prescript{}{no}{D}_{nv}$ (see section \sref{s:tpsadef}).
+
+In fragment of item \ref{itc2},  as in section (\sref{s:exttay}), the call \vn{c_init_all(no,nv)} creates polynomials in \vn{nv} variables but {\bf no} phase space, i.e., $nd2=0$, therefore the parameters for \vn{QF1} and \vn{QF2} are respectively 1 and 2.  The output from item \ref{itc2} is:
+
+\renewcommand{\codefont}{\footnotesize}
+\begin{code}
+ A polyphorm powered by a knob : FPP no phase space maps
+  x1
+
+ etall    1, NO =    2, NV =    7, INA =   28
+ *********************************************
+
+    I  COEFFICIENT          ORDER   EXPONENTS
+      NO =     2      NV =     7
+   0   2.247400000000000       0  0  0  0  0  0  0
+   1   1.000000000000000       0  1  0  0  0  0  0
+    -2   0.000000000000000       0  0  0  0  0  0  0
+  x2
+  Real Part
+
+ etall    1, NO =    2, NV =    7, INA =   35
+ *********************************************
+
+    I  COEFFICIENT          ORDER   EXPONENTS
+      NO =     2      NV =     7
+   0   2.247400000000000       0  0  0  0  0  0  0
+   1   1.000000000000000       0  1  0  0  0  0  0
+    -2   0.000000000000000       0  0  0  0  0  0  0
+  Imaginary Part
+
+ etall    1, NO =    2, NV =    7, INA =   36
+ *********************************************
+
+    I  COEFFICIENT          ORDER   EXPONENTS
+      NO =     2      NV =     7
+   0   2.253847435260914       0  0  0  0  0  0  0
+   1   1.000000000000000       1  0  0  0  0  0  0
+    -2   0.000000000000000       0  0  0  0  0  0  0
+\end{code}
+\renewcommand{\codefont}{\small}
+
+We see that the knobs are the first and second variable of the Taylor series.
+
+\subsubsection{Knobs with phase space: item \ref{itc3}}
+\label{s:initwithps}
+
+In fragment of item \ref{itc3},  as in section (\sref{s:exttay}), the call \vn{c_init_all(no,nd,np,ndpt=0)} creates polynomials in \vn{nv=2*nd+np} variables. The huge difference with the call from the previous section (\sref{s:initigno}) is the creation of a phase space of  \vn{nd2=2*nd} dimension, \vn{nd}  degrees of freedom.  According to \Eq{eq:knobdef}, the position of knob 1 and 2 will be respectively 7 and 8.
+
+The variable \vn{ndpt} can be give the values 0, 5 or 6. It affects on the normal form. If ndpt is 0 (\vn{ndpt} is optional, default=0), the 3 planes execute pseudo-harmonic oscillations and the normal form is 3 rotations. If the \vn{ndpt} is 5 or 6, than the normal form is a drift-like matrix in the longitudinal plane. In that case, \vn{ndpt} is the position of the energy-like variable. It is 6 in Bmad and that variable is $\delta p \over p_0$. In this section, since there are no normal form displayed, this is completely irrelevant. 
+
+Here is the result of running item \ref{itc3}:
+
+\renewcommand{\codefont}{\footnotesize}
+\begin{code}
+ Taylors powered by a knob : FPP with phase space maps
+
+ etall    1, NO =    2, NV =    8, INA =   30
+ *********************************************
+
+    I  COEFFICIENT          ORDER   EXPONENTS
+      NO =     2      NV =     8
+   0   2.247400000000000       0  0  0  0  0  0  0  0
+   1   1.000000000000000       0  0  0  0  0  0  0  1
+    -2   0.000000000000000       0  0  0  0  0  0  0  0
+  Real Part
+
+ etall    1, NO =    2, NV =    8, INA =   37
+ *********************************************
+
+    I  COEFFICIENT          ORDER   EXPONENTS
+      NO =     2      NV =     8
+   0   2.247400000000000       0  0  0  0  0  0  0  0
+   1   1.000000000000000       0  0  0  0  0  0  0  1
+    -2   0.000000000000000       0  0  0  0  0  0  0  0
+  Imaginary Part
+
+ etall    1, NO =    2, NV =    8, INA =   38
+ *********************************************
+
+    I  COEFFICIENT          ORDER   EXPONENTS
+      NO =     2      NV =     8
+   0   2.253847435260914       0  0  0  0  0  0  0  0
+   1   1.000000000000000       0  0  0  0  0  0  1  0
+    -2   0.000000000000000       0  0  0  0  0  0  0  0
+\end{code}
+\renewcommand{\codefont}{\small}
+
+ 
+\subsubsection{Knobs with phase space via PTC: item \ref{itc4}}
+\label{s:initwithpsptc}
+
+The result below is identical to that of section (\sref{s:initwithps}). The difference lies in the way the FPP is activated. Here we pass a so-called \vn{internal_state}.
+First, in item \ref{itc4}, we see that main program invoked Bmad units: therefore energy will be the sixth variable. Secondly, by default, the cavity is turned on. This corresponds to the FPP call \vn{c_init_all(no,nd,np,ndpt=0)}. If the \vn{internal_state} invokes \vn{nocavity0}, than cavities are generally turned into drifts and this is equivalent to \vn{c_init_all(no,nd,np,ndpt=6)} in Bmad units.
+
+\begin{code}
+  Jordan Normal Form            0
+ ************ State Summary ****************
+ MADTHICK=>KIND =   32  DRIFT-KICK-DRIFT
+  Rectangular Bend: input arc length (rho alpha)
+  Default integration method     2
+  Default integration steps      8
+ This is an electron (positron actually if charge=1)
+       EXACT_MODEL =  TRUE
+       TOTALPATH   =     0
+       RADIATION   =  FALSE
+       STOCHASTIC  =  FALSE
+       ENVELOPE    =  FALSE
+       NOCAVITY    =  FALSE
+       TIME        =  TRUE
+       FRINGE      =  FALSE
+       PARA_IN     =  FALSE
+       ONLY_2D     =  FALSE
+       ONLY_4D     =  FALSE
+       DELTA       =  FALSE
+       SPIN        =  FALSE
+       MODULATION  =  FALSE
+       RAMPING     =  FALSE
+       ACCELERATE  =  FALSE
+ Taylors created by a knob : PTC with phase space maps
+
+ etall    1, NO =    2, NV =    8, INA =   30
+ *********************************************
+
+    I  COEFFICIENT          ORDER   EXPONENTS
+      NO =     2      NV =     8
+   0   2.247400000000000       0  0  0  0  0  0  0  0
+   1   1.000000000000000       0  0  0  0  0  0  0  1
+    -2   0.000000000000000       0  0  0  0  0  0  0  0
+  Real Part
+
+ etall    1, NO =    2, NV =    8, INA =   37
+ *********************************************
+
+    I  COEFFICIENT          ORDER   EXPONENTS
+      NO =     2      NV =     8
+   0   2.247400000000000       0  0  0  0  0  0  0  0
+   1   1.000000000000000       0  0  0  0  0  0  0  1
+    -2   0.000000000000000       0  0  0  0  0  0  0  0
+  Imaginary Part
+
+ etall    1, NO =    2, NV =    8, INA =   38
+ *********************************************
+
+    I  COEFFICIENT          ORDER   EXPONENTS
+      NO =     2      NV =     8
+   0   2.253847435260914       0  0  0  0  0  0  0  0
+   1   1.000000000000000       0  0  0  0  0  0  1  0
+    -2   0.000000000000000       0  0  0  0  0  0  0  0
 \end{code}
 
 %--------------------------------------------------------------------------------------------------------
