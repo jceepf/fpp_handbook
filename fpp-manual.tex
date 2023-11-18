@@ -2220,7 +2220,7 @@ TPSA  closed orbit  0.4576E-02 -0.8650E-05 -0.1701E-04 -0.4623E-04
  We see that the situation as improved and approaches the DA result.     It is not surprising that users of COSY-INFINITY must run at very higher order in rings. This is not necessary with a symplectic integrator provided all the maps are around the closed orbit, i.e., DA maps.
 %--------------------------------------------------------------------------------------------------------
 %--------------------------------------------------------------------------------------------------------
-\Section{Taylor and Complex Taylor Fundamental Types used in TC}
+\Section{Taylors and Polymorphs}
 \label{s:fundamental}
  
 The PP of FPP defines two fundamental structures that are the building blocks of many other structures:
@@ -2258,25 +2258,55 @@ type complex_8
 end type complex_8
  \end{code}
  
- \subsection{The various Taylor Types}
-\label{s:taylorc}
+ \subsection{The various Taylor types of the analysis package}
+\label{s:taylorall}
 
+
+We describe below the taylor (\vn{taylor}) and complex Taylor (\vn{complextaylor}) used in the polymorphs. They  are all based on the real package of Berz: \vn{dabnew.f90}.
+
+%--------------------------------------------------------------------------------------------------------
 \subsubsection{Taylor Type}
 \label{s:taylor}
 
-The \vn{taylor} structure overloads the Taylor series of the original real ``DA-Package'' of
-Berz.  The structure is
+The \vn{taylor} structure stores  an integer  which points to a stored Taylor (or element of $\prescript{}{no}{D}_{nv}$) in Berz's original package.
+
+The structure is:
 \begin{code}
 type taylor
-   integer i    ! Pointer to Berz
-end type taylor
+   type (taylor) r     ! Real part of complex Taylor series.
+   type (taylor) i     ! Imaginary part of complex Taylor series.
+end type complextaylor
 \end{code}
-The Berz package \vn{dabnew.f90} uses a positive integer to point to different Taylor series and the
-\vn{taylor} structure just stores a reference integer.
 
+We can look at the function \vn{add}, from \vn{i_tpsa.f90}, which overloads addition:
+
+\begin{code}
+  function add( s1, s2 )
+    implicit none
+    type (taylor) add
+    type (taylor), intent (in) :: s1, s2
+    integer localmaster
+    if(.not.c_%stable_da) then
+       add%i=0
+      return
+    endif
+    localmaster=master
+
+    call ass(add)
+    
+ ! Old Fortran77 called on the integer pointers of 
+ ! s1, s2 and add, all type taylors
+ 
+    call daadd(s1%i,s2%i,add%i)   
+
+    master=localmaster
+
+  end function add
+  \end{code}
+  
 %--------------------------------------------------------------------------------------------------------
 \subsubsection{ComplexTaylor Type}
-\label{s:taylor}
+\label{s:ctaylor}
 
 The \vn{complextaylor} structure stores two Taylor series which represent the real and imaginary parts.
 The structure is:
@@ -2285,6 +2315,24 @@ type complextaylor
    type (taylor) r     ! Real part of complex Taylor series.
    type (taylor) i     ! Imaginary part of complex Taylor series.
 end type complextaylor
+\end{code}
+
+Again, showing the function \vn{add}, from \vn{l_complex_taylor.f90}, which overloads addition, is self-explanatory:
+
+\begin{code}
+  function add( s1, s2 )
+    implicit none
+    type (complextaylor) add
+    type (complextaylor), intent (in) :: s1, s2
+    integer localmaster
+    localmaster=master
+    call ass(add)
+    
+    add%r=s1%r+s2%r  ! adds using overloading
+    add%i=s1%i+s2%i
+    
+    master=localmaster
+  end function add
 \end{code}
 
  \subsubsection{C_taylor Type}
@@ -2301,7 +2349,7 @@ end type c_taylor
 
 Everything that was said about \vn{taylor} in section (\sref{s:taylor}) applies to \vn{c_taylor} if one substitutes \vn{c_dabnew.f90} for Berz's package. In this new package, all the coefficients are \vn{complex(dp)}.
 
- \subsection{Examples of the polymorphs  \vn{real_8}  and  \vn{complex_8} }\label{s:rc8}
+ \subsection{Examples of the polymorphs  \vn{real_8}  ~ and  \vn{complex_8}  }\label{s:rc8}
   
  The Taylor series embedded in types \vn{real_8} and \vn{complex_8}, types \vn{taylor} and \vn{complextaylor} respectively, are all coming from the real package \vn{dabnew.f90} of Berz. 
  
@@ -2641,8 +2689,198 @@ First, in item \ref{itc4}, we see that main program invoked Bmad units: therefor
     -2   0.000000000000000       0  0  0  0  0  0  0  0
 \end{code}
 
+\section{The \vn{c_damap} ~ type: fundamental to analysis}
+\label{s:cdamap}
+
+
+
+
+
+
+
+The \vn{c_damap} type is given by:
+
+\begin{code}
+type c_damap
+! Orbital part
+ type (c_taylor) v(lnv) !@1 orbital part of the map
+ type(c_quaternion) q
+! Stochastic part
+ complex(dp) e_ij(6,6) !@1 stochastic fluctuation in radiation theory
+! Number of planes allocated
+ integer :: n=0 !@1 number of planes allocated
+!  Initial orbit if tpsa =  true
+ complex(dp) x0(lnv)
+ logical :: tpsa=.false.
+!  Lie map matrix  (Yu's square matrix)
+ complex(dp), pointer :: cm(:,:)=> null() 
+!  Moment matrix (transpose of Yu Matrix)  
+ real(dpn),pointer :: m(:,:)=> null()
+! SO(3) is deprecated in FPP
+! and computed from quaternion if needed
+ type(c_spinmatrix) s !@1 spin matrix
+end type c_damap
+\end{code}
+
+\subsection{The \vn{c_} ~ type: storing global data for AP}
+\label{s:cunder}
+
+Before discussing the \vn{c_damap}, we need to understand a few parameters that are crucial to that map and are global in AP. We can show a code fragment that prints them in  particularly complex cases.  This is from the main program \vn{z_track_c_.f90}. 
+
+There are two basic ways to track in TC: the RF-cavity is on or the RF-cavity is off. Even when RF cavity are absolutely necessary, it is useful to compute a 6-d map with the RF cavity off, i.e., with $\delta p = \rm constant$. Why?
+
+\begin{enumerate}
+\item [state=nocavity] In that case, it is possible, via simple normal form, to compute things like the chromaticities, the dispersions, the phase slip, etc\ldots  Strictly speaking these concepts are ill-defined in the presence of longitudinal oscillations. However they are approximately defined for a small synchrotron (longitudinal) tune which is the case in normal rings. 
+\item [state=default] In that case,  the cavities are turned on. This is usually the ``physical'' case. It is necessary when extracting from the map the longitudinal tunes and the damping decrements due to radiation. PTC also computes the quadratic fluctuations $\left\langle{z_i z_j}\right\rangle$, 21 of them, from which beam sizes can be extracted. We can also extract the so-called ``equilibrium'' emittances which are also approximate concepts, i.e., valid in the limit of small damping.
+\end{enumerate}
+ 
+ Consider the following call:
+ 
+\begin{code}
+p=>ring%start
+call move_to(ring,p,"QF1")   !  Locating QF1 in TC
+!  PP : making a Polymorph into a knob
+call make_it_knob(p%magp%bn(2),1,s=1.0_dp)  
+p_QF1=>p
+call move_to(ring,p,"QF2")   ! Locating QF2 in TC
+call make_it_knob(p%magp%bn(2),2,s=1.0_dp)  
+p_QF2=>p
+	.
+	.
+no=2
+nd=3
+np=2
+	.
+	.
+call in_bmad_units()
+bmad_state=default+time      !+nocavity
+
+call init_all(bmad_state,no,np)
+\end{code}
+ 
+ This initializes FPP and AP in particular to track with cavities. The basic phase space will be 6 dimensional with 3 tunes. We print the relevant parts of \vn{c_}:
+ 
+ \begin{code}
+  Taylors created with two knobs : PTC with phase space maps
+ Cavities turned on
+        c_%no =   2   !  Order of TPSA
+        c_%nv =   8   !  Total number of variables
+        c_%nd =   3   !  Orbital degrees of freedom
+       c_%nd2 =   6   !  c_%nd2=2*c_%nd
+   c_%nd2harm =   6   !  All oscillating planes including magnet modulation
+      c_%ndpt =   0   !  Energy is not constant
+ c_%ndpt_bmad =   1   !  Bmad units used
+        c_%np =   2   !  Number of parameters
+  c_%npara_fpp=   6   !  Position of parameters minus 1
+       c_%nd2t=   6   !  Oscillating orbital planes
+      c_%ndc2t=   0   
+ c_%pos_of_delta  6
+         c_%rf=   0
+    c_%setknob=   T
+       c_%knob=   T
+ \end{code}
+
+ These numbers are all encoded in \vn{bmad_state=default+time}. Bmad by default using 3 degrees of freedom. Moreover, these 3 planes are oscillating with a cavity. This is encoded in \vn{c_%nd2t=6}.  
+ Notice that there are 8 variables total: 2 quadrupole strengths at location \newline
+   \vn{c_%npara_fpp+1} and \vn{c_%npara_fpp+2}.
+ 
+ Before we go into a detailed explanations of type \vn{c_damap}, we show a more complex call to \vn{init_all}. We run PTC with the \vn{internal_state}  
+ \begin{code}
+ 	.
+ 	.
+ call in_bmad_units()
+!call in_ptc_units()
+bmad_state=default+time0+nocavity0
+bmad_state=bmad_state+modulation0+spin0
+ 	.
+ 	.
+  \end{code}
+  and then we get:  
+ \begin{code}
+ Taylors created with 2 knobs : PTC with phase space maps
+  without a cavity and modulation on a magnet
+        c_%no =   2
+        c_%nv =  10
+        c_%nd =   4
+       c_%nd2 =   8
+   c_%nd2harm =   6
+      c_%ndpt =   6
+ c_%ndpt_bmad =   1
+        c_%np =   2
+  c_%npara_fpp=   8
+       c_%nd2t=   4
+      c_%ndc2t=   2
+ c_%pos_of_delta  6
+         c_%rf=   1
+    c_%setknob=   T
+       c_%knob=   T
+ \end{code}
+ 
+ The first thing we notice is that \vn{c_%ndpt=6}.
+ This means that the sixth variable is the energy variable and is a constant. The orbital phase space has 6 dimensions. However we notice that the number of oscillating 
+ dimensions is 4, i.e., \vn{c_%nd2t=4} that is the two transverse orbital planes.
+ 
+ The total phase space is eight since \vn{c_%nd2=8}
+  and thus the maps have 8 entries.
+ This is because of the presence of a modulating magnet. Additional parameters, the two quadrupoles, must occupy the $9^{th}$ and $10^{th}$ variables. The total number of TPSA variables and indeed we have \vn{c_%nv=10}.
+ 
+ These numbers are necessary for AP. However this is automatically set up by the call to \newline  \vn{init_all(bmad_state,no,np)}.
+ 
+ FPP does not attempt to do a forensic analysis of a map and then determine the right settings. Indeed if a map is created outside PTC, the user must either call \vn{init_all(state,no,np)} with the proper state or directly call \vn{c_init_all}. For example, the above case can be reproduced by the pure AP call:
+ 
+ 
+ \begin{code}
+no=2
+nd=4
+np=2
+ndpt=6
+knob=.true.
+ac_modulation=1
+call c_init_all(no,nd,np,ndpt,ac_modulation) 
+ \end{code}
+ 
+ Even if you do not use PTC,  calls to initialize FPP via a PTC \vn{internal_state} like \vn{bmad_state} are far less cryptic.
+ 
+ 
+ \subsection{The \vn{c_damap} ~in detail}
+\label{s:cdamapdet}
+ 
+ The Taylor maps can be used for all sorts of purposes (see \sref{s:ptcmap}). But its main function, in TC proper, is analysis and {\bf not} tracking. This is not true of ``matrix'' codes like COSY-INFINITY or MARYLIE where the ultimate object of the code is a one-turn Taylor map. In TC, the tracking is achieved normally by pushing through individual magnets using a variety of integrators. This is also true in the case of Bmad which not only includes PTC, but also also a collection of tracking methods which for the most part are integrators. For example, Bmad has a variable step Runge-Kutta method which handles complex magnets without the paraxial approximation,i.e., does not assume Hills equations.
+ 
+ It is true that most users of PTC seek it for its ability to produce Taylor maps, but it is fundamentally an integrator whose algebra is extended from $(\mathbb{R},+,\times)$ to $(\prescript{}{no}{D}_{nv} ,+,\times )$ via polymorphism. What it is and what it is used for --- often confused by users--- are two different things.
+ 
+ Here we concentrate on the DA map, i.e., a map around the closed orbit.  All constant parts are ignored and that includes \vn{c_damap%x0}
+ whose functions is described in section (\sref{s:concattpsa}) and \Eq{eq:concatt}: it is the $w_0$ of map $m_{w_0}$.
+ 
+ The \vn{c_damap} contains primarily phase space and a quaternion:
+ 
+ \begin{code}
+ type c_damap
+! Orbital part
+ type (c_taylor) v(lnv) !@1 orbital part of the map
+ type(c_quaternion) q
+ 	.
+ 	.
+  \end{code}
+  
+  The array \vn{%(lnv)} 
+  contains the phase space variables. For example, in a normal Bmad run, it will contain the six polynomials for  $(x,p_x,y,p_y,-\beta ct,\delta)$, the usual Bmad variables. 
+  If a ``clock'' is present for sinusoidal magnet modulation, then it will contain eight polynomials $(x,p_x,y,p_y,-\beta ct,\delta, q_c,p_c)$.
+  
+  The type \vn{c_quaternion} is made of four \vn{c_taylor}:
+  
+ \begin{code}
+ type  c_quaternion
+  type(c_taylor) x(0:3)
+end type c_quaternion
+  \end{code}
+  
+  
+  
+  
+  
 %--------------------------------------------------------------------------------------------------------
-\subsection{Overloaded Operators for Taylor and ComplexTaylor Types}
+\subsection{Overloaded Operators for Taylor and Complex Taylor Types}
 \label{s:taylor.over}
 
 Overloaded operators for \vn{taylor} and \vn{complextaylor} types include the standard functions
@@ -3487,6 +3725,9 @@ Note: calling init again wipes out existing Taylor series. (Does is wipe out uni
 Explain knobs
 
 \newpage
+ 
+
+ 
 
 %%\printbibliography
 
