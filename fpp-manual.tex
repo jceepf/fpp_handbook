@@ -1,7 +1,7 @@
 %-----------------------------------------
 % To process this file:
 %   pdflatex fpp-manual
-%   bibtex fpp-manual
+%   biber fpp-manual
 %   pdflatex fpp-manual
 %   pdflatex fpp-manual
 %-----------------------------------------
@@ -37,14 +37,14 @@
 \usepackage[pdftex,colorlinks=true,bookmarksnumbered=true]{hyperref}   % Must be last package!
 \usepackage{titletoc,tocloft}%
 
+\addbibresource{bibliography.bib}
+
 \setlength{\cftsubsecindent}{1cm}
 \setlength{\cftsubsubsecindent}{2cm}
 %\dottedcontents{section}[1.5em]{}{1.3em}{.6em}
 %-------------------------------------------------------------------
 
 \input{macros.tex}
-
-\addbibresource{bibliography.bib}
 
 \definecolor{backcolor}{rgb}{0.8824,1.0,1.0}   % To match code environment
 \definecolor{h}{rgb}{0.8824,0.3,0.3} 
@@ -185,7 +185,7 @@ The FPP package can be used with any  tracking code including TC. Indeed one can
 \Section{Where to Obtain FPP/PTC}
 \label{s:obtain}
 
-FPP/PTC can be downloaded from the web via the Bmad web site\cite{b:Bmad} or at
+FPP/PTC can be downloaded from the web via the Bmad web site\cite{b:bmad} or at
 \begin{code}
 https://github.com/jceepf/fpp_book
 \end{code}
@@ -3726,10 +3726,7 @@ Explain knobs
 
 \newpage
  
-
- 
-
-%%\printbibliography
+\printbibliography
 
 \end{document}
 
