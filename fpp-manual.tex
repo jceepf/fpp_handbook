@@ -85,10 +85,10 @@
  
 %--------------------------------------------------------------------------------------------------------
 \begin{document}
-
+ 
 \phantomsection
 \pdfbookmark[1]{Cover Page}{Cover Page}
-\maketitle
+%\maketitle
 
 \cleardoublepage
 \phantomsection
@@ -2876,7 +2876,128 @@ end type c_quaternion
   \end{code}
   
   
+  Two DA \vn{c_damap}'s \vn{S1}  and \vn{S2} are concatenated by the following code fragment:
   
+\begin{code}
+function c_concat(s1,s2)
+implicit none
+type (c_damap) c_concat
+type (c_damap), intent (in) :: s1, s2
+t1=s1;t2=s2;
+
+! code for s1 o s2
+! removes the constant part since these are da maps
+do i=1,t1%n
+t1%v(i)=t1%v(i)-(t1%v(i).sub.'0')
+enddo
+do i=1,t2%n
+t2%v(i)=t2%v(i)-(t2%v(i).sub.'0')
+enddo
+
+! calls to the concatanator in c_dabnew.f90
+call c_etcct(t1%v%i,t1%n,t2%v%i,t2%n,tempnew%v%i) 
+! the constant part at the end of the orbit (not necessary)
+if(add_constant_part_concat) then
+do i=1,t1%n
+tempnew%v(i)=tempnew%v(i)+(s1%v(i).sub.'0')
+enddo
+endif
+t1%q = t1%q*t2 !!! substituting s2 into quaternion of s1
+tempnew%q=t1%q*t2%q !!! multiplying quaternions
+
+\end{code}
+  
+  Symbolically, we can write the above code fragment as:
+%
+%]|Expr|[#b @`b___})b L# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|""*|:"c-?concat,Ex :!,F,] :"S1,Ex"#Symbol^:#&c0  .P:"&c0!*S2,E|
+%|x: ;bP;/":!;bP8 :"c-?concat,Eq:!,F,]<c%"C^<cY A^<c!(A))# b'4:"S|
+%|1,Eq:#&c0  .P:"&c0!*S2,Ex}& b!( b"0 b#8 b$@ b%H b&P!WW}}}(#"$Monaco^:$transformed|
+%| quaternion}_}:" :#&c0  .T:"&c0!* S2,Eq:! : ;8/<:";bP8eq,Zconcat|
+%|90: ;8/=;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} c\_concat\%x\ &= S1\%x\circ S2\%x\nonumber \\
+ c\_concat\%q&=\underbrace{\left\{{S1\%q\circ S2\%x}\right\}}\limits_{{\rm t}{\rm r}{\rm a}{\rm n}{\rm s}{\rm f}{\rm o}{\rm r}{\rm m}{\rm e}{\rm d} ~{\rm q}{\rm u}{\rm a}{\rm t}{\rm e}{\rm r}{\rm n}{\rm i}{\rm o}{\rm n}}^{}\ \times \ S2\%q \label{eq:concat90}\end{align}
+
+
+ The $\times$ in \Eq{eq:concat90} represents quaternion multiplication.
+ 
+ We know that the motion can also include radiation. The classical radiation, which is deterministic, is stored in the orbital map.  However, the stochastic part, the quadratic fluctuation of the moments, is stored in \vn{c_damap%e_ij(1:6,1:6)}. 
+ Denoting the linear part of \vn{S1} and \vn{S2} by the matrices \vn{M1} and \vn{S2}, we have:
+ %
+%]|Expr|[#b @`b___})b H# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|""*|:"c-?concat,EE-?ij :!,F,] :"M2 S1,EE-?ij $("M2}_)"# b'4:!-<|
+%|top}& b!( b"0 b#8 b$@ b%H b&P!WW}:" ,K S2,EE-?ij:! : ;8/<:";bP8eq|
+%|,Zconcate90: ;8/=;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} c\_concat\%E\_ij\ &= M2\ S1\%E\_ij\ {M2}^{\top}\ +\ S2\%E\_ij \label{eq:concate90}\end{align}
+
+\Eq{eq:concate90} is realized by the code: 
+
+ \begin{code}
+	.
+	.
+      t1=t1.sub.1     
+      m2=t1    
+      m2t=transpose(m2)
+      tempnew%e_ij=t1%e_ij + matmul(matmul(m2,t2%e_ij),m2t)	
+\end{code}
+  
+Other parts of the \vn{c_damap} are experimental. For example, in \vn{c_damap%cm(:,:)} one can compute and store the
+ matrix representation of the Lie map associated to the orbital map: this is a huge matrix acting on space of polynomials of order \vn{no} and dimension \vn{nv}.
+ The huge matrix \vn{c_damap%m(:,:)} 
+ is the matrix acting on moment. In a deterministic case, it is the transposed of \vn{c_damap%cm(:,:)}. 
+ 
+ These matrices are not used in AP for analysis. It is possible in theory to compute a normal form directly using the matrix \vn{c_damap%cm(:,:)}, 
+ see  \cite{yujordan}for example.
+  
+  \section{The normal form and the vector field}\label{sec:norm}
+  
+ It is in the normal form where  all of perturbation theory is embedded. This type can permit the extraction of any lattice function, linear and nonlinear. 
+ For example, it can {\bf trivially} extract the dependence of the coupled Courant-Snyder invariants in terms of parameters including $\delta p$ if energy is a constant.
+ It can compute all quantities related to spin with equal ease using quaternions.  Obviously it follows that phase advances for both the orbital and the spin are trivially contructed once these tools exist. This is the topic of Forest's new book \cite{thenewbook} which unfortunately uses $SO(3)$ instead of quaternions. 
+ 
+ Normal forms can also leave a ``single resonance'' in the map. This is topologically equivalent to the one-resonance Hamiltonian theory. It can be done with either an orbital resonance or a spin resonance.  
+ 
+Here is the normal form structure. We skip things in it which are obsolescent.
+
+ \begin{code}
+type c_normal_form
+!!!  full transformation with spin 
+ type(c_damap) atot  !   for spin   (m = atot n atot^-1)
+ type(c_vector_field) h,h_l,h_nl
+!!!envelope radiation stuff to normalize radiation (sand's like theory)
+ complex(dp) s_ij0(6,6)  !   equilibrium beam sizes
+ complex(dp) s_ijr(6,6)  !   equilibrium beam sizes in resonance basis
+ complex(dp) b_ijr(6,6)  !    stochastic kick in resonance basis
+!  equilibrium emittances as defined by chao 
+! (computed from s_ijr(2*i-1,2*i) i=1,2,3 )
+ real(dp) emittance(3)  
+!! controls resonances left in normal form
+! stores resonances to be left in the map, including spin (ms)
+ integer nres,m(ndim2t/2,nreso),ms(nreso) 
+!! redundant stuff
+! stores simple information
+ real(dp) tune(ndim2t/2),damping(ndim2t/2),spin_tune,quaternion_angle 
+ logical positive ! forces positive tunes (close to 1 if <0)
+ 	.
+ 	.
+ 	.
+end type c_normal_form
+\end{code}
+
+  
+  \subsection{ The normal form}\label{s:normalform}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  \section{more...}
+
   
   
 %--------------------------------------------------------------------------------------------------------
