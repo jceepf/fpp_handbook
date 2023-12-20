@@ -36,7 +36,8 @@
 \usepackage[nottoc,numbib]{tocbibind}   % Makes "References" section show in table of contents
 \usepackage[pdftex,colorlinks=true,bookmarksnumbered=true]{hyperref}   % Must be last package!
 \usepackage{titletoc,tocloft}%
-
+%%%%%%%%%%%%%$$$$$$$$$$$$$$$$$$$$$$$%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \addbibresource{bibliography.bib}
 
 \setlength{\cftsubsecindent}{1cm}
@@ -72,6 +73,15 @@
 \renewcommand{\l@table}{\@dottedtocline{1}{1.5em}{3.3em}}
 \makeatother
 
+
+\def\ta{http://www.takafumi.org/etienne/new_pages/simple_programs/}
+\def\tb{http://www.takafumi.org/etienne/new_pages/maps/}
+
+\newcounter{mytable}
+\Alph{mytable}
+\def\smytable{\refstepcounter{mytable}\themytable}
+%\newcommand\smytable[1][]{\refstepcounter{mytable}\label{#1}\themytable }
+%\refstepcounter{foo}
 %--------------------------------------------------------------------------------------------------------
 
 \title{Fully Polymorphic Package Manual}
@@ -88,7 +98,7 @@
  
 \phantomsection
 \pdfbookmark[1]{Cover Page}{Cover Page}
-%\maketitle
+\maketitle
 
 \cleardoublepage
 \phantomsection
@@ -145,6 +155,25 @@ To appreciate the role of PP, we can show a tiny piece of code  TC representing 
           X(3)=X(3)+L*X(4)/PZ
 \end{code}         
  
+ For completeness, here is  type \vn{real_8}:
+ 
+ \begin{code}
+   TYPE REAL_8
+     TYPE (TAYLOR) T      !  USED IF TAYLOR
+     REAL(DP) R           !    USED IF REAL
+     INTEGER KIND  !  0,1,2,3 (1=REAL,2=TAYLOR,3=TAYLOR KNOB, 0=SPECIAL)
+     INTEGER I   !   USED FOR KNOBS AND SPECIAL KIND=0
+     REAL(DP) S   !   SCALING FOR KNOBS AND SPECIAL KIND=0
+     LOGICAL(lp) :: ALLOC  ! IF TAYLOR IS ALLOCATED IN DA-PACKAGE
+  END TYPE REAL_8
+ \end{code}
+ 
+In the above definition, we see \vn{real_8%t}
+ and \vn{real_8%r}.  
+ They are respectively the Taylor and double precision entries of the polymorph. If the polymorph must for some reason become a Taylor series, then its value is stored in \vn{%t}, otherwise it is stored in  \vn{%r}.   
+  A \vn{real_8}  can also be a ``knob'': this is described in section (\sref{s:rc8}).
+ 
+ 
 If  type \vn{REAL_8} was simply \vn{real(8)}, then this code fragment would simply be the exact formula for a drift in canonical variables. However \vn{REAL_8} can become a Taylor series in certain chosen variables at execution time and thus Taylor series can be produced. The actual package that does the Taylor calculation is the package of Martin Berz\cite{b:berz.da}
 , namely the old version from LBNL properly modified by Johan Bengtson and overloaded by Etienne Forest using Fortran90.
  
@@ -179,6 +208,7 @@ In fact most analysis in PTC in done by people (including the authors) who write
 
 
 The FPP package can be used with any  tracking code including TC. Indeed one can  write an integrator in Fortran90 using the polymorphic types of FPP for the production and analysis of Taylor maps: Forest has written many such examples in lectures.
+
 
 
 %--------------------------------------------------------------------------------------------------------
@@ -221,7 +251,7 @@ can actually be used separately. It allows for   tracking using Taylor maps: rem
 The purpose of this section is to explain why we would like to write an integrator equipped with polymorphism. Of course the purpose exists before the code and, for the most part, is not the result of ``Darwinian evolution''. 
 
 
- It is true from a goal driven point of view (teleological) that PTC was created with  the production of Taylor maps of phase space in mind. This is simply because Forest is convinced, see references \cite{thebook} and \cite{thenewbook}, that an analytical theory primarily based on finite ``s'' maps is superior than a theory primarily based on the  s-dependent Hamiltonian of the Courant-Snyder theory. This s-dependent Hamiltonian is far from the code and thus not adequate as the primary theory for most applications. 
+ It is true from a goal driven point of view (teleological) that PTC was created with  the production of Taylor maps of phase space in mind. This is simply because Forest is convinced, see references \cite{thebook} and \cite{thenewbook}, that an analytical theory primarily based on finite ``s'' maps is superior than a theory primarily based on the  s-dependent Hamiltonian of the Courant-Snyder theory in the context of accelerators. This s-dependent Hamiltonian is far from the code and thus not adequate as the primary theory for most applications. 
  
  But can we guess from TC's structure, the tracking part, that PTC prioritizes  a map-based theory for analysis? The answer as we will see is :no.
  
@@ -230,7 +260,7 @@ The purpose of this section is to explain why we would like to write an integrat
  \begin{enumerate}
  \item We can write a beam line code whose goal is the production of Taylor series approximate maps around some chosen orbit and whose internal structure reflects this goal. 
  The prime representative of such codes is COSY-INFINITY\cite{cosy9,cosynim}. This is also true of MARYLIE,  TRANSPORT\cite{slac75} and the Twiss modules part of MAD8 ported into  MAD-X. All these codes choose a ``design'' orbit and then compute Taylor maps around this orbit. If a user examine these codes, especially  TRANSPORT, Taylor series maps will jump in their faces: arrays of monomial coefficients for each phase space variables are defined and they contain increasingly complex  formulae as the degree increases. The TRANSPORT approach reached a grotesque end point with the code COSY 5.0
- \footnote{This is not to be confuse with COSY-INFINITY which uses Berz's TPSA package. COSY 5.0\cite{cosy5ham} was really the end of the dinosaur line of TRANSPORT like codes. It is mercifully extinct.}
+ \footnote{This is not to be confused with COSY-INFINITY which uses Berz's TPSA package. COSY 5.0\cite{cosy5ham} was really the end of the dinosaur line of TRANSPORT like codes. It is mercifully extinct.}
 % 
  of Berz : Fortran formulae at the fifth order Taylor coefficients covered pages of computer generated algebra.
  \item
@@ -276,6 +306,240 @@ xyz = 3.4_dp * abc / 1e9_dp   ! 3.4_dp and 1e9_dp are double precision.
 \end{code}
 
 In this manual, \vn{real(dp)} is often written as \vn{real(8)} in case the meaning of \vn{dp} is forgotten. However \vn{dp} could be \vn{16} if quadruple precision is used.
+
+\subsection{Some useful operators on Taylor series}\label{s:useful}
+
+This section contains simple operations which are useful mainly to programmers using FPP.
+
+ It must be remarked that the integral operator \vn{.i.} loses one order in the taylor series. It is better to use the \vn{c_universal_taylor} if integrals are needed to obtained Poisson bracket operators.
+
+\setcounter{mytable}{0}
+{\footnotesize
+\begin{center}
+\begin{tabular}{|l|c|c|}
+\hline
+ & Description (t: c_taylor) & Fortran Operator \\ \hline
+\multirow{3}{*}{ \refstepcounter{mytable}\label{t:1}\themytable}
+ & & \\
+ & Real and imaginary part of c_taylor       & t=real(t) and t= aimag(t)  \\
+  & & \\
+ \hline
+\multirow{3}{*}{\smytable}
+ & & \\
+ & Extract the coefficient of $x_i$  (constructing matrices)  & r=t.index.i \\
+  & & \\
+ \hline
+\multirow{3}{*}{\smytable}
+ & & \\
+ & ${dt \over d{x}_{i}}$ and  $\int_{}^{}t\ d{x}_{i}$  & \href{\ta z_deriv.f90}{t=t.d.i } and \href{\ta z_deriv.f90}{t=t.i.i } \\
+  & & \\
+ \hline
+\multirow{3}{*}{\smytable}
+ & & \\
+ & Extract  order ``i''  & \href{\ta z_sub_i.f90}{t=t.sub.i } \\
+  & & \\
+ \hline
+
+\multirow{3}{*}{ \refstepcounter{mytable} \themytable}
+ & & \\
+ & Truncates above ``i''  & \href{\ta z_cut_sub.f90}{m=m.cut.i } \\
+  & & \\
+ \hline
+
+\multirow{3}{*}{\smytable}
+ & & \\
+ & Extracts  coefficient $r$ of  monomials $\ {x}_{1}^{{j}_{1}}\cdots{x}_{1}^{{j}_{nv}}$ & \href{\ta z_sub_j.f90}{r=t.sub.j or r=t.sub.j}   \\
+  & & \\
+ \hline
+
+\multirow{3}{*}{\smytable}
+ & & \\
+ &
+ t=a + b $x_i$ where a and b are real or complex
+& %
+\href{\ta z_var.f90}{t=a+b dz_c(i)} 
+ \\
+  & & \\
+ \hline
+
+
+
+\multirow{3}{*}{\smytable}
+ & & \\
+ &Create Monomials 
+%
+%
+%]|Expr|[#b @`b___})## b'4" Helvetica|: ;bP8&c0!*,D[#! (&"!*|:!r|
+%| $^x^1^$^j^1_'b M$^x^1^$^j(!nv}_: }(%:!r $^x^1^$^j^1_'b M$^x^|
+%|1^$^j(!nv}_}(#r $^x^i_}}: ,D}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+$\begin{array}{ccc}r\ {x}_{1}^{{j}_{1}}\cdots{x}_{1}^{{j}_{nv}}\\
+r\ {x}_{1}^{{j}_{1}}\cdots{x}_{1}^{{j}_{nv}}\\
+r\ {x}_{i}\end{array}$
+
+
+& %
+%]|Expr|[#b @`b___})## b'4" Helvetica|: ;bP8&c0!*,D[#! (?-[-<rm|
+%| -<href-[-<ta z-?sub-?i,Nf90-]-[t,]r,Ncmono,Nj,H1,Znv,I-] -]}|
+%|(?-[-<rm -<href-[-<ta z-?sub-?i,Nf90-]-[t,]r,Ncmono,Nj,H1,Znv|
+%|,I-] -]}(?-[-<rm -<href-[-<ta z-?sub-?i,Nf90-]-[t,]r,Ncmono,N|
+%|j,H1,Znv,I-] -]}},D}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+$\begin{array}{ccc}{\rm \href{\ta z_sub_i.f90}{t=r.cmono.j(1:nv)} }\\
+{\rm \href{\ta z_mono.f90}{t=r.cmono.'j1...jnv'} }\\
+{\rm \href{\ta z_mono.f90}{t=r.cmono.i} }\end{array}$
+ \\
+  & & \\
+ \hline
+\multirow{3}{*}{ \refstepcounter{mytable}\label{t:par}\themytable}
+ & & \\ &
+Peek coefficient $t$ , as a c_taylor, of monomial %
+%]|Expr|[#b @`b___})%# b'4" Helvetica|: ;bP8&c0!*,D$^"!*|:!x^1|
+%|^$^j^1_'b M$^x^n^$^j^n_: ,D}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+${x}_{1}^{{j}_{1}}\cdots{x}_{n}^{{j}_{n}}$
+& %
+ %
+%]|Expr|[#b @`b___})## b'4" Helvetica|: ;bP8&c0!*,D["! (=-[-<rm|
+%| -<href-[-<ta z-?par,Nf90-]-[t,]r,Npar,Nj,H1,Znv,I-] -]}(<-[-<|
+%|rm -<href-[-<ta z-?par,Nf90-]-[t,]r,Npar,N,Gj1,N,N,Njn,G -]-]}}|
+%|,D}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+$\begin{array}{cc}{\rm \href{\ta z_par.f90}{t=r.par.j(1:nv)} }\\
+{\rm \href{\ta z_par.f90}{t=r.par.'j1...jn' }}\end{array}$
+ \\
+  & & \\
+ \hline
+\multirow{3}{*}{\smytable}
+ & & \\
+ &
+Generalization of .par. using a type called sub_taylor (inf)
+& %
+\href{\ta z_parT.f90}{t=r.par.inf or t=r.part.inf } 
+ \\
+  & & \\
+ \hline
+\multirow{3}{*}{ \refstepcounter{mytable}\label{t:shift}\themytable}
+ & & \\
+ &
+Shift exponents downwards by k
+& %
+\href{\ta z_shift.f90}{t=t<=k} 
+ \\
+  & & \\
+ \hline
+\multirow{3}{*}{\smytable}
+ & & \\
+ &
+ Peek and shift (operators \ref{t:par} and \ref{t:shift}  combined)
+& %
+\href{\ta z_shift.f90}{t=t<=k} 
+ \\
+  & & \\
+ \hline
+\multirow{3}{*}{\smytable}
+ & & \\
+ &
+	Pseudo derivative  : %
+$d({x}_{i}^{n})={x}_{i}^{n-1}$
+
+& %
+\href{\ta z_pseudo_deriv.f90}{t=t.k.i} 
+ \\
+  & & \\
+ \hline
+\multirow{3}{*}{\smytable}
+ & & \\
+ &
+Poisson Bracket
+
+& %
+\href{\ta z_poisson.f90}{t=t.pb.t'} 
+ \\
+  & & \\
+ \hline
+\end{tabular}
+\end{center}
+ }
+
+\subsection{Some useful operators on c_damap and c_vector_field  }\label{s:usefulmap}
+
+
+\setcounter{mytable}{0}
+{\footnotesize
+\begin{center}
+\begin{tabular}{|l|c|c|}
+\hline
+ & Description  (M,A: c_damap and F,F': c_vector_field %
+%]|Expr|[#b @`b___})%# b'4" Helvetica|: ;bP8&c0!*,DF"!Symbol^:!&c0  /7|
+%|/1: &c0!*,D}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+$F\cdot \nabla $
+)& Fortran Operator \\ \hline
+\multirow{3}{*}{ \refstepcounter{mytable} \themytable}
+ & & \\
+ & Extract  order ``i''  & \href{\tb z_cut_sub.f90}{M=M.sub.i } \\
+  & & \\
+ \hline
+\multirow{3}{*}{ \refstepcounter{mytable} \themytable}
+ & & \\
+ & Truncates above ``i''  & \href{\tb z_cut_sub.f90}{M=M.cut.i } \\
+  & & \\
+ \hline
+\multirow{3}{*}{ \refstepcounter{mytable} \themytable}
+ & & \\
+ & Extracts  order ``i''  & \href{\tb z_vf_cut_sub.f90}{F=F.sub.i } \\
+  & & \\
+ \hline
+\multirow{3}{*}{ \refstepcounter{mytable} \themytable}
+ & & \\
+ & Truncates above ``i''  & \href{\tb z_vf_cut_sub.f90}{F=F.cut.i } \\
+  & & \\
+ \hline
+\multirow{3}{*}{ \refstepcounter{mytable} \themytable}
+ & & \\
+ & Exponenting a vector field & \href{\tb z_vf_cut_sub.f90}{M=exp(F,M) or M=exp(F)} \\
+  & & \\
+ \hline
+\multirow{3}{*}{ \refstepcounter{mytable} \themytable}
+ & & \\
+ & Logarithm of a map (look at link for optional variables) & \href{\tb z_vf_cut_sub.f90}{F=ln(M)} \\
+  & & \\
+ \hline
+\multirow{3}{*}{ \refstepcounter{mytable} \themytable}
+ & & \\
+ & Transforming a vector field with a vector field& \href{\tb z_vf_Lie_sub.f90}{F=exp_ad( F,F')}\\
+  & & \\
+ \hline
+\multirow{3}{*}{ \refstepcounter{mytable} \themytable}
+ & & \\
+ & 
+%
+%]|Expr|[#b @`b___})/# b'4" Helvetica|: ;bP8&c0!*,D"!Chicago^:!A|
+%|<c!$1()""Times|:"F"#Symbol^:#&c0  /7/1"$*|:$&c0!*,K: -<hat-[:$f|
+%|: -]}}$^:!A_(": ,M1},]:$ <c$4Q^F}:#&c0  /7/1:$&c0!*,K: -<hat-[|
+%|<c$4Q^:$f}: -],D}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+${\cal A}\left({F\cdot \nabla +\hat{f}}\right){{\cal A}}^{-1}=\ \widetilde{F}\cdot \nabla +\hat{\widetilde{f}}$
+%
+%]|Expr|[#b @`b___})## b'4" Helvetica|: ;bP8&c0!*,D[#" )%# b'4|
+%|$^<c$4Q^"!*|:!F}^k_: ,]<c!$1(#$^:!F^i_$^""Symbol^:"&c0  .V^:!&c0!*i|
+%|_$^a^k(",M1}}}:"&c0  .P:!&c0!*a}& b!( b"0 b#8 b$@ b%H b&P!WW}|
+%|_),# b'4<c$4Q^: f} ,]<c!$1(#$^<c$4Q^:!F}^k_$^:"&c0  .V^:!&c0!*k|
+%|_$^:"&c0  a_(":!&c0!*,M1}}}:"&c0  a:!&c0!*,K$^:"&c0  a_(":!&c0!*,M|
+%|1}f:"&c0  .P:!&c0!*a :"&c0  a}& b!( b"0 b#8 b$@ b%H b&P!WW}_(4|
+%|:!&c0!*a"#Monaco^:# is the orbital map and :"&c0  a:#&c0!* is|
+%| the quaternion:! }_}: ,D}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+$\begin{array}{cc}{\widetilde{F}}_{k}=\left({{F}_{i}{\partial }_{i}{a}_{k}^{-1}}\right)\circ a&\\
+\widetilde{f} =\left({{\widetilde{F}}_{k}{\partial }_{k}{\alpha }^{-1}}\right)\alpha +{\alpha }^{-1}f\circ a\ \alpha &\\
+a~{\rm i}{\rm s}~{\rm t}{\rm h}{\rm e}~{\rm o}{\rm r}{\rm b}{\rm i}{\rm t}{\rm a}{\rm l}~{\rm m}{\rm a}{\rm p}~{\rm a}{\rm n}{\rm d} ~\alpha ~{\rm i}{\rm s}~{\rm t}{\rm h}{\rm e}~{\rm q}{\rm u}{\rm a}{\rm t}{\rm e}{\rm r}{\rm n}{\rm i}{\rm o}{\rm n}\ &\end{array}$
+& \href{\tb z_vf_Lie_sub.f90}{F=A*F}
+\\
+  & & \\
+ \hline
+
+\end{tabular}
+\end{center}
+ }
+
+
+
+
+
 %-------------------------------------------------------------------
 \subsection{TPSA Versus DA}
 \label{s:tpsa}
@@ -656,15 +920,14 @@ Next we see how to such maps can be concatenated.
  
  Consider two TPSA maps:
 %
-%]|Expr|[#b @`b___})b G# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
-%|$^""*|:"m)!# b'4$^w^0_}& b!( b"0 b#8 b$@ b%H b&P!WW}_<c!$1^"#Symbol^:#&c0  D}|
-%|:!&c0!*,]$^:"w^1_,K$^M)!# b'4$^w^0_}& b!( b"0 b#8 b$@ b%H b&P!WW}|
-%|_:!,H:#&c0  D:"&c0!*,M$^w^0_:!,I"$Monaco^:$   and   $^:"n)!# b'4|
-%|$^z^0_}& b!( b"0 b#8 b$@ b%H b&P!WW}_<c!$1^:#&c0  D}:!&c0!*,]|
-%|$^:"z^1_,K$^N)!# b'4$^z^0_}& b!( b"0 b#8 b$@ b%H b&P!WW}_:!,H|
-%|:#&c0  D:"&c0!*,M$^z^0_:!,I : ;8/<:";bP8eq,Zconcatt: ;8/=:!;bP8 |
-%|: -;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
-\begin{align} {m}_{{w}_{0}}\left({\Delta }\right)={w}_{1}+{M}_{{w}_{0}}(\Delta -{w}_{0})~~~{\rm a}{\rm n}{\rm d} ~~~{n}_{{z}_{0}}\left({\Delta }\right)={z}_{1}+{N}_{{z}_{0}}(\Delta -{z}_{0}) \label{eq:concatt} \end{align}
+%]|Expr|[#b @`b___})b H# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|$^""*|:"m)!# b'4$^w^0_}& b!( b"0 b#8 b$@ b%H b&P!WW}_<c!$1^z}|
+%|:!,]$^:"w^1_,K$^M)!# b'4$^w^0_}& b!( b"0 b#8 b$@ b%H b&P!WW}_|
+%|:!,H:"z,M$^w^0_:!,I"#Monaco^:#   and   $^:"n)!# b'4$^z^0_|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}_<c!$1^z}:!,]$^:"z^1_,K$^N)!# b'4|
+%|$^z^0_}& b!( b"0 b#8 b$@ b%H b&P!WW}_:!,H:"z,M$^z^0_:!,I : ;8/<|
+%|:";bP8eq,Zconcatt: ;8/=:!;bP8 :" : -;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} {m}_{{w}_{0}}\left({z}\right)={w}_{1}+{M}_{{w}_{0}}(z-{w}_{0})~~~{\rm a}{\rm n}{\rm d} ~~~{n}_{{z}_{0}}\left({z}\right)={z}_{1}+{N}_{{z}_{0}}(z-{z}_{0}) \label{eq:concatt} \ \end{align}
 
 
 For the record here, in FPP, the map ${m}_{{w}_{0}}$ of \Eq{eq:concatt} is stored as follows:
@@ -712,20 +975,21 @@ We  compute now the map $t=m\circ n$:
 %|: ;8/=;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
 %
 
-%]|Expr|[#b @`b___})b I# b'4" Chicago^: ;bP8&c0!*-="!Times|:!t|
-%|""Helvetica|:",F,]<c!$1(#$^"#*|:#m)!# b'4$^w^0_|
-%|}& b!( b"0 b#8 b$@ b%H b&P!WW}_"$Symbol^:$&c0  .P$^:#&c0!*n)!# b'4|
-%|$^z^0_}& b!( b"0 b#8 b$@ b%H b&P!WW}_}}<c!$1^:$&c0  D}: ;bP;&c0!*/"|
-%|:";bP8 ,F,]$^:#w^1_,K$^M)!# b'4$^w^0_}& b!( b"0 b#8 b$@ b%H b&P!WW}|
-%|_:",H$^:#n)!# b'4$^z^0_}& b!( b"0 b#8 b$@ b%H b&P!WW}_<c!$1^:$&c0  D}|
-%|:#&c0!*,M$^w^0_:",I: ;bP;/":";bP8 ,F,]$^:#w^1_,K$^M)!# b'4$^w|
-%|^0_}& b!( b"0 b#8 b$@ b%H b&P!WW}_:",H$^:#N)!# b'4$^z^0_|
-%|}& b!( b"0 b#8 b$@ b%H b&P!WW}_:",H:$&c0  D:#&c0!*,M$^z^0_:",I,K|
-%|$^:#z^1_,M$^w^0_:",I:# : ;8/<:#;bP8eq,Zconcattot: ;8/=;bP8-;|
+%
+%]|Expr|[#b @`b___})b J# b'4" Chicago^: ;bP8&c0!*-="!Times|:!t|
+%|<c!$1^""*|:"x}"#Helvetica|:#,F,]<c!$1(#$^:"m)!# b'4$^w^0_|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}_"$Symbol^:$&c0  .P$^:"&c0!*n)!# b'4|
+%|$^z^0_}& b!( b"0 b#8 b$@ b%H b&P!WW}_}}<c!$1^x}: ;bP;/":#;bP8 |
+%|,F,]$^:"w^1_,K$^M)!# b'4$^w^0_}& b!( b"0 b#8 b$@ b%H b&P!WW}_|
+%|:#,H$^:"n)!# b'4$^z^0_}& b!( b"0 b#8 b$@ b%H b&P!WW}_<c!$1^x}|
+%|,M$^w^0_:#,I: ;bP;/":#;bP8 ,F,]$^:"w^1_,K$^M)!# b'4$^w^0_|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}_:#,H$^:"N)!# b'4$^z^0_|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}_:#,H:"x,M$^z^0_:#,I,K$^:"z^1_,M|
+%|$^w^0_:#,I:" : ;8/<:";bP8eq,Zconcattot: ;8/=;bP8-;|
 %|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
-\begin{align}t&=\left({{m}_{{w}_{0}}\circ {n}_{{z}_{0}}}\right)\left({\Delta }\right)\nonumber \\
- &={w}_{1}+{M}_{{w}_{0}}({n}_{{z}_{0}}\left({\Delta }\right)-{w}_{0})\nonumber \\
- &={w}_{1}+{M}_{{w}_{0}}({N}_{{z}_{0}}(\Delta -{z}_{0})+{z}_{1}-{w}_{0})\ \label{eq:concattot}\end{align}
+\begin{align}t\left({x}\right)&=\left({{m}_{{w}_{0}}\circ {n}_{{z}_{0}}}\right)\left({x}\right)\nonumber \\
+ &={w}_{1}+{M}_{{w}_{0}}({n}_{{z}_{0}}\left({x}\right)-{w}_{0})\nonumber \\
+ &={w}_{1}+{M}_{{w}_{0}}({N}_{{z}_{0}}(x-{z}_{0})+{z}_{1}-{w}_{0})\ \label{eq:concattot}\end{align}
 
 This operation is done in FPP between two \vn{c_damap}'s using the operator \vn{.o.}
 
@@ -824,6 +1088,68 @@ ${M}_{{w}_{0}}\circ {N}_{{z}_{0}}$. This is why, in FPP, the DA concatenation do
 
 
 This DA operation is done in FPP between two \vn{c_damap}'s using the operator \vn{*}.
+
+\subsubsection{Where are  TPSA map and DA stored: one two Fortran type but two operations}\label{s:storage}
+
+A code like TC naturally produces TPSA maps of the form
+%
+%]|Expr|[#b @`b___}):# b'4" Chicago^: ;bP8&c0!*-="!Times|:!TC,H|
+%|z,I,]$^""*|:"m)!# b'4$^w^0_}& b!( b"0 b#8 b$@ b%H b&P!WW}_<c!$1|
+%|^z}"#Helvetica|:#,]$^:"w^1_,K$^M)!# b'4$^w^0_|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}_:#,H:"z,M$^w^0_:#,I"$Monaco^:$ |
+%|  : ;8/<:";bP8eq,Ztpsamap: ;8/=:#;bP8 : -;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align}TC(z)=
+{m}_{{w}_{0}}\left({z}\right)={w}_{1}+{M}_{{w}_{0}}(z-{w}_{0})~~~\label{eq:tpsamap} \end{align}
+%
+%
+This map is produced by tracking a particle starting at  ${w}_{0}$ and using TPSA to extract the Taylor representation denoted by ${M}_{{w}_{0}}$.  However there is an infinite number of choices for $w_0$:
+%
+%]|Expr|[#b @`b___}).# b'4" Chicago^: ;bP8&c0!*-="!Times|:!TPSA|
+%|,]$^<c!(A($$^""*|:"w^0_"#Symbol^:#&c0  /.$(%"$Helvetica|:$&c0!*-<|
+%|mathbb-[R-]}_^6<c!0!(0:"TC,Hz,I,]$^m)!# b'4$^w^0_|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}_<c!$1^z}:$,]$^:"w^1_,K$^M)!# b'4|
+%|$^w^0_}& b!( b"0 b#8 b$@ b%H b&P!WW}_:$,H:"z,M$^w^0_:$,I}}}}(#|
+%|:"No,]:#&c0  .E}_"%Monaco^:%&c0!*   : ;8/<:";bP8eq,Ztpsamapd: ;8/=|
+%|:$;bP8 : -;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align}TPSA=
+{\left\{{{w}_{0}\in {\mathbb{R}}^{6}\left|{TC(z)=
+{m}_{{w}_{0}}\left({z}\right)={w}_{1}+{M}_{{w}_{0}}(z-{w}_{0})}\right.}\right\}}_{No=
+\infty }~~~\label{eq:tpsamapd} \end{align}
+
+If the order $No$ is infinite, then all these maps are identical and anyone could be used to represent the map of the code, namely $TC(z)$. You are simply expanding the same function around a different point.
+
+In fact their Taylor representations form a natural equivalent class. Things start to degenerate if $No$ is finite, as it is in all realistic applications:
+%
+%]|Expr|[#b @`b___}).# b'4" Chicago^: ;bP8&c0!*-=$(!"!Times|:!TPSA}|
+%|(!No}_,]$^<c!(A($$^""*|:"w^0_"#Symbol^:#&c0  /.$(%"$Helvetica|:$&c0!*-<|
+%|mathbb-[R-]}_^6<c!0!(0:"TC,Hz,I:#&c0  .[$^:"&c0!*m)!# b'4$^w^|
+%|0_}& b!( b"0 b#8 b$@ b%H b&P!WW}_<c!$1^z}:$,]$^:"w^1_,K$^M)!# b'4|
+%|$^w^0_}& b!( b"0 b#8 b$@ b%H b&P!WW}_:$,H:"z,M$^w^0_:$,I}}}}(#|
+%|:"No,\:#&c0  .E}_"%Monaco^:%&c0!*   : ;8/<:";bP8eq,Ztpsamapda|
+%|: ;8/=:$;bP8 : -;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align}{TPSA}_{No}=
+{\left\{{{w}_{0}\in {\mathbb{R}}^{6}\left|{TC(z)\approx {m}_{{w}_{0}}\left({z}\right)={w}_{1}+{M}_{{w}_{0}}(z-{w}_{0})}\right.}\right\}}_{No<\infty }~~~\label{eq:tpsamapda} \end{align}
+
+With a finite $No$, there is a need to be close to the design orbit (LINAC) or closed orbit (ring). This is to avoid feed down issues. This is achieved, in a ring, by choosing the map expressed around the actual closed orbit of the code TC.
+
+It is clear that any member of that set can be stored to order $No$ in the type \vn{c_damap}. Therefore we use this type for both DA and TPSA maps.
+
+ The difference is in the operator used: both are types \vn{c_damap}. If \vn{M} and \vn{N} are DA maps, then the resulting DA map \vn{K} will be:
+
+\begin{code}
+K=M*N
+\end{code}
+
+If we intend \vn{M} and \vn{N} to be TPSA maps, then the code is
+
+\begin{code}
+K=M.o.N
+\end{code}
+
+The code for \vn{M*N} completely ignore the constant parts when performing the required substitutions. For example, in a linear map, we are just multiplying matrices.
+
+As we will see in section (\sref{s:exampletpsa}) ), $w_0$ is stored in \vn{c_damap%x0(:)}. It is ignored by the DA concatanation ``$*$''.
 
 \subsection{Finding the closed orbit of  a one-turn TPSA map}\label{s:fixtpsa}
 
@@ -2335,7 +2661,7 @@ Again, showing the function \vn{add}, from \vn{l_complex_taylor.f90}, which over
   end function add
 \end{code}
 
- \subsubsection{C_taylor Type}
+ \subsubsection{C_taylor Type}\label{s:ctaylortype}
 \label{s:ctaylor}
 
 The \vn{c_taylor} structure stores  Taylor series in the complexified version of Berz's TPSA package: \vn{c_dabnew.f90}. This type is used only in AP and in the glue between AP and TC. (See section  \sref{s:extmap})
@@ -2951,13 +3277,13 @@ Other parts of the \vn{c_damap} are experimental. For example, in \vn{c_damap%cm
   
   \section{The normal form and the vector field}\label{sec:norm}
   
- It is in the normal form where  all of perturbation theory is embedded. This type can permit the extraction of any lattice function, linear and nonlinear. 
+ It is in the normal form where  a lot  of perturbation theory is embedded. This type can permit the extraction of any lattice function, linear and nonlinear. 
  For example, it can {\bf trivially} extract the dependence of the coupled Courant-Snyder invariants in terms of parameters including $\delta p$ if energy is a constant.
  It can compute all quantities related to spin with equal ease using quaternions.  Obviously it follows that phase advances for both the orbital and the spin are trivially contructed once these tools exist. This is the topic of Forest's new book \cite{thenewbook} which unfortunately uses $SO(3)$ instead of quaternions. 
  
  Normal forms can also leave a ``single resonance'' in the map. This is topologically equivalent to the one-resonance Hamiltonian theory. It can be done with either an orbital resonance or a spin resonance.  
  
-Here is the normal form structure. We skip things in it which are obsolescent.
+Here is the normal form structure. We skip variables of the structure   which are obsolescent.
 
  \begin{code}
 type c_normal_form
@@ -2985,19 +3311,621 @@ end type c_normal_form
 \end{code}
 
   
-  \subsection{ The normal form}\label{s:normalform}
+  \subsection{ The normal form type}\label{s:normalform}
   
+  See program \vn{z_track_normal_tpsa.f90} for a simple call to the normal form.
   
+  The normal form rewrites a \vn{c_damap} as follows:
+%
+%]|Expr|[#b @`b___})3# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|""*|:"n :!,F,]$^:"a_(",M1}"#Symbol^:#&c0  .P:"&c0!* m :#&c0  .P|
+%|:"&c0!*a:! : ;8/<:";bP8eq,Znormalf: ;8/=;bP8-;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} n\ &={a}^{-1}\circ \ m\ \circ a \label{eq:normalf}\end{align}
+
+where $n$ is called a normal form. In the simplest case, in the presence of a cavity, the orbital map is an amplitude dependent rotation. If classical radiation is present, it is an amplitude dependent dilation (rotation and damping akin to a circular drain).  The simplest call to achieve this is
+
+\begin{code}
+type(c_normal_form) normal_form
+type(c_damap)  one_turn_map_AP
+	.
+	.
+	.
+call c_normal(one_turn_map_AP,normal_form)
+\end{code}
+
+We deduce that in Fortran90,   the equivalent of \Eq{eq:normalf} is 
+\begin{code}
+type(c_normal_form) normal_form
+type(c_damap) n , one_turn_map_AP
+	.
+	.
+	.
+call c_normal(one_turn_map_AP,normal_form)
+n=normal_form%a**(-1)*one_turn_map_AP*normal_form%a
+\end{code}
+
+
+The analysis AP has two global parameters of importance:
+
+\begin{code}
+logical :: remove_tune_shift=.false.
+complex(dp) :: n_cai=-2*i_
+\end{code}
   
+If the parameter  \vn{remove_tune_shift} is true, then in the case of a damped map, the code will attempt to remove all nonlinearities and create a linear sink. This is generally not recommended in accelerator physics since damping decrements are often very small. On a map without radiation, this will create a crash since division by zero will occur: it is impossible to remove tune shifts with amplitude by similarity transformations in the symplectic case.
+
+The parameter \vn{n_cai} can be $-i=-\sqrt{(-1)}$ or $-2i$.  This parameter selects the phasors' definition which is the complex transformation which diagonalizes the linear part of $n$ which is  rotation.  That is to say that matrix part  of $n$, denoted $N$, obeys, in 1-d-f:
+%
+%]|Expr|[#b @`b___})4# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|""Symbol^:"&c0  L"#*|:#&c0!*,]$^C_(",M1}NC"$Monaco^:$    where|
+%|    R,]<c!$1^["" ^$^e_(#,Mi:"&c0  m}^:$&c0!*0^0^$^e_(":#i:"&c0  m}}}|
+%|:!&c0!* : -;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} \Lambda =
+{C}^{-1}NC~~~~{\rm w}{\rm h}{\rm e}{\rm r}{\rm e}~~~~{\rm R}=\left({\begin{array}{cc}{{\rm e}}^{-{\rm i}\mu }&{\rm 0}\\
+{\rm 0}&{{\rm e}}^{i\mu }\end{array}}\right) \end{align}
+
+
+ If  \vn{n_cai = -2i}, then 
+%
+%
+%]|Expr|[#b @`b___})b @# b'4" Chicago^: ;bP8&c0!*-="!Monaco^:!map|
+%| $^""Helvetica|:"c_(",M1},Z      $^x_(!new},F,]x,Kip:!  : ;bP;/"|
+%|"#*|:#;bP8 $^:"p_(!new},F,]x,Mip : ;8/<:#;bP8eq,Zctrans: ;8/=|
+%|;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align}{\rm m}{\rm a}{\rm p}~{c}^{-1}:      {x}^{new}&=x+ip~~\nonumber \\
+\ {p}^{new}&=x-ip \label{eq:ctrans}\end{align}
+%
+Notice that the Poisson bracket $[x^{new},p^{new}]=n_{cai}=-2i$. More importantly, we have for \Eq{eq:ctrans}:
+%
+%
+%]|Expr|[#b @`b___})4# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|$^x_(!new}$^p_(!new},F,]$^x_^2,K$^p_^2,]2J : ;8/<""*|:";bP8eq|
+%|,Zj2i: ;8/=;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} {x}^{new}{p}^{new}&={x}^{2}+{p}^{2}=2J \label{eq:j2i}\end{align}
+%
+If on the other hand \vn{n_cai = -i}, then we have:
+%
+%]|Expr|[#b @`b___})b G# b'4" Chicago^: ;bP8&c0!*-="!Monaco^:!map|
+%| $^""Helvetica|:"c_(",M1},Z      $^x_(!new},F,]<2^1^<b R^2_}}|
+%|<c!$1(#x,Kip}}:!  : ;bP;/""#*|:#;bP8 $^:"p_(!new},F,]<2^1^<b R|
+%|^2_}}<c!$1(#x,Mip}} : ;8/<:#;bP8eq,Zctransi: ;8/="$Symbol^:$;bP8 |
+%|:"-<-<:# :!and  <c!=Q(#$^:"x_(!new},L$^p_(!new}}},F,],Mi: -;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align}{\rm m}{\rm a}{\rm p}~{c}^{-1}:      {x}^{new}&={1 \over \sqrt {2}}\left({x+ip}\right)~~\nonumber \\
+\ {p}^{new}&={1 \over \sqrt {2}}\left({x-ip}\right) \label{eq:ctransi} \\\ {\rm a}{\rm n}{\rm d} ~~\left[{{x}^{new},{p}^{new}}\right]&=-i\end{align}
+%
+with
+%
+%]|Expr|[#b @`b___})1# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|$^""Times|:"x_(!new}$^p_(!new}:!,F,]$^:"x_^2,K$^p_^2,]J:! : ;8/<|
+%|"#*|:#;bP8eq,Zji: ;8/=;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} {x}^{new}{p}^{new}&={x}^{2}+{p}^{2}=
+J \label{eq:ji}\end{align}
+%
+It can be argued that the choice \vn{n_cai = -i} is the best since the action is simply the product of the phase space variables.
   
+  In phasors, the full normalized map is:
+%
+%]|Expr|[#b @`b___})># b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|""*|:"d,]$^c_(",M1}"#Symbol^:#&c0  .P:"&c0!*n :#&c0  .P:"&c0!*c|
+%|:!,F,]$^:"c_(",M1}:#&c0  .P$^:"&c0!*a_(",M1}:#&c0  .P:"&c0!* |
+%|m :#&c0  .P:"&c0!*a:#&c0  .P:"&c0!*c:! : ;8/<:";bP8eq,Znormalfp|
+%|: ;8/=;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} d=
+{c}^{-1}\circ n\ \circ c&={c}^{-1}\circ {a}^{-1}\circ \ m\ \circ a\circ c \label{eq:normalfp}\end{align}
+
+The maps $c$  and $c^{-1}$ are obtained using the function  \vn{c_phasor()} and  \vn{ci_phasor()} respectively.
+ 
+
+  \subsection{The type \vn{c_vector_field}  ~type and Lie maps}\label{s:vecf}
+
+The normal form is defined, in FPP, via  vector fields: 
+
+\begin{code}
+type c_vector_field   
+! n dimension used v(1:n) (nd2 by default) ;
+! nrmax some big limiting integer to use for exponentiation
+ integer :: n=0,nrmax
+! if eps=-integer  then |eps| # of lie brackets are taken
+! otherwise eps=eps_tpsalie=10^-9
+ real(dp) eps
+! orbital part
+ type (c_taylor) v(lnv)
+! quaternion part
+ type(c_quaternion) q
+ end type c_vector_field
+\end{code}
+ 
+ The type \vn{c_quaternion} is defined as
+ 
+\begin{code}
+type  c_quaternion
+ type(c_taylor) x(0:3)
+end type c_quaternion
+\end{code}
+ 
+ A general quaternion is defined from type \vn{c_quaternion} as
+ %
+%]|Expr|[#b @`b___})b ]# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|""Times|:"q:!,F,] "#*|:# :"q,Ex,H0,I ,K q,Ex,H1,I$^b^1_,K q,E|
+%|x,H2,I$^b^2_,K q,Ex,H3,I$^b^3_:# : ;8/<:#;bP8eq,Zcqua: ;8/=:!;bP8-<-<|
+%|"$Symbol^:$ "%Monaco^:%where  b:!,F,]<c!$1(%i,Lj,Lk}} : ;8/<:#;bP8eq|
+%|,Zcqua: ;8/=;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} q&= \ q\%x(0)\ +\ q\%x(1){b}_{1}+\ q\%x(2){b}_{2}+\ q\%x(3){b}_{3}\ \label{eq:cqua}\\ {\rm w}{\rm h}{\rm e}{\rm r}{\rm e}~~{\rm b}&=\left({i,j,k}\right) \label{eq:cqua}\end{align}
+
+$i$, $j$ and $k$ are the 3 usual quaternions which define the quaternion algebra.
+ 
+ In FPP, the action of a \vn{c_vector_field} on a 
+ 
+ 
+%
+%]|Expr|[#b @`b___})># b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|""Times|:"F,]"#*|:#F,E<c$%!^v}"$Symbol^:$&c0  /7<c$%!^/1}:#&c0!* |
+%|,KF,Eq,]F,Ev,Hi,I$^:$&c0  .V^:#&c0!*i_,KF,Eq: ;8/<:#;bP8hop: ;8/=|
+%|;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} F=
+F\%\vec{v}\cdot \vec{\nabla }\ +F\%q=
+F\%v(i){\partial }_{i}+F\%q\label{hop}\end{align}
+%
+where in \Eq{hop} it is summed over the index $i$.
+
+A general vector field as in \Eq{hop}, acts on a map $m$  as    follows:
+%
+%]|Expr|[#b @`b___})b R# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|<c!$1(!""*|:"Fm}},Ex,Hk,I:!,F,]:"F,Ev,Hi,I$^"#Symbol^:#&c0  .V|
+%|^:"&c0!*i_m,Ex,Hk,I: ;bP;/":!;bP8 <c!$1(!:"Fm}},Eq:!,F,]:"F,E|
+%|v,Hi,I$^:#&c0  .V^:"&c0!*i_m,Eq ,K m,Eq:#&c0  .T:"&c0!*F,Eq:! |
+%|: -;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} \left({Fm}\right)\%x(k)&=F\%v(i){\partial }_{i}m\%x(k)\nonumber \\
+ \left({Fm}\right)\%q&=F\%v(i){\partial }_{i}m\%q\ +\ m\%q\times F\%q \end{align}
+
+
+
+A map near the identity always have a vector field representation. So if $m$ is near  the identity
+%
+%]|Expr|[#b @`b___})b H# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|""Symbol^:"&c0  ,D"#*|:#&c0!*F     m,]:!-<exp<c!$1^:#F}I  "$Monaco^:$ |
+%|   where "%Times|:%I:$ is the identity map : ;8/<:#;bP8eq,Zliemapf|
+%|: ;8/=:!;bP8 : -;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} \exists F\ \ \ \ \ m=
+\exp\left({F}\right)I\ \ ~~~~{\rm w}{\rm h}{\rm e}{\rm r}{\rm e}~I~{\rm i}{\rm s}~{\rm t}{\rm h}{\rm e}~{\rm i}{\rm d} {\rm e}{\rm n}{\rm t}{\rm i}{\rm t}{\rm y}~{\rm m}{\rm a}{\rm p}~\label{eq:liemapf} \end{align}
+
+ If we have a function $f$ of phase space, then the Lie maps have the following ''virtue'':
+ %
+%]|Expr|[#b @`b___})b G# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|""*|:" "#Monaco^:#if   :"m,]:!-<exp<c!$1^:"F}I   :!-<Longrightarrow|
+%|    f"$Symbol^:$&c0  .P:"&c0!*m,]:!-<exp<c!$1^:"F}f  : ;8/<:";bP8eq|
+%|,Zliemapff: ;8/=:!;bP8 : -;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} \ {\rm i}{\rm f}~~~m=
+\exp\left({F}\right)I\ \ \ \Longrightarrow    f\circ m=
+\exp\left({F}\right)f\ \ \label{eq:liemapff} \end{align}
+%
+%
+\Eq{eq:liemapff} implies that transforming a function by a map $m$ can be done with a Lie operator. It also implies that a Lie operator is a ``compositional'' map.
+
+Here is a list of operation using the vector field.
+\begin{code}
+
+\end{code}
+
+
+Now we define the normal form in terms of Lie operators.
+ 
+  \subsection{The Lie operator of the normal form}\label{s:lienorm}
+
+The map $d$ of \Eq{eq:normalfp} is, in the simplest symplectic case, an amplitude dependent rotation. Using Dragt's notation for Lie maps (calligraphic font), we can write the Lie map associated to $d$, i.e., $\cal D$ as :
+%
+%]|Expr|[#b @`b___})1# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|: D""*|:" ,] :!-<exp<c!$1(%:"H"#Symbol^:#&c0  /7/1:"&c0!*,Kq}}|
+%|:!  : ;8/<:";bP8eq,Zlied: ;8/=;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} {\cal D}\ =
+\ \exp\left({H\cdot \nabla +q}\right)  \label{eq:lied}\end{align}
+%
+where
+%
+%]|Expr|[#b @`b___})b!## b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|""*|:"q:!,F,]-<cos<c!$1(#"#Symbol^:#&c0  q:"&c0!*,O2}}:! ,K -<|
+%|sin<c!$1(#:#&c0  q:"&c0!*,O2}}   : ;8/<:";bP8eq,Zqnorm: ;8/=:";bP8 |
+%| :# :!-<-<:# :" :!,F"$Times|:$   :#&c0  q:"&c0!*,]:#&c0  q:"&c0!*,H|
+%|$^J^1_,L'b M,L$^J(!nd}_,I"%Monaco^:%  and  $^:"J^i_,]$^z($2i,M|
+%|1}_$^z("2i}_:$    :%per:$    :!-<Eq-[eq,Zji-] : .O-;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} q&=\cos\left({\theta /2}\right) + \sin\left({\theta /2}\right)\ \ \ \label{eq:qnorm}\ \  \\ \ &\ \ \ \theta =
+\theta ({J}_{1},\cdots,{J}_{nd})~~{\rm a}{\rm n}{\rm d} ~~{J}_{i}=
+{z}_{2i-1}{z}_{2i}\ \ \ \ {\rm p}{\rm e}{\rm r}\ \ \ \ \Eq{eq:ji} \nonumber 
+\end{align}
+and
+%
+%]|Expr|[#b @`b___})b B# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|$^""*|:"H^1_$^"#Symbol^:#&c0  .V^:"&c0!*1_:!,F,]:",Mi$^z^1_$^|
+%|:#&c0  m^:"&c0!*1_<c!$1)%# b'4$^J^1_,L'b M,L$^J(!nd}_|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}}$^:#&c0  .V^:"&c0!*1_ "$Monaco^:$ |
+%|  and   $^:"H^2_$^:#&c0  .V^:"&c0!*2_,]i$^z^1_$^:#&c0  m^:"&c0!*1|
+%|_<c!$1)%# b'4$^J^1_,L'b M,L$^J(!nd}_}& b!( b"0 b#8 b$@ b%H b&P!WW}}|
+%|$^:#&c0  .V^:"&c0!*2_:! : ;8/<:";bP8eq,Zampdts: ;8/=;bP8-;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} {H}_{1}{\partial }_{1}&=-i{z}_{1}{\mu }_{1}\left({{J}_{1},\cdots,{J}_{nd}}\right){\partial }_{1}\ ~~~{\rm a}{\rm n}{\rm d} ~~~{H}_{2}{\partial }_{2}=
+i{z}_{1}{\mu }_{1}\left({{J}_{1},\cdots,{J}_{nd}}\right){\partial }_{2} \label{eq:ampdts}\end{align}
+%
+In the case of damping, a real piece is added to \Eq{eq:ampdts}:
+%
+%]|Expr|[#b @`b___})b A# b'4" Chicago^: ;bP8&c0!*-="!Monaco^:! |
+%|real part""Helvetica|:",F,]"#*|:#,M$^z^1_$^"$Symbol^:$&c0  a^|
+%|:#&c0!*1_<c!$1)%# b'4$^J^1_,L'b M,L$^J(!nd}_|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}}$^:$&c0  .V^:#&c0!*1_ :!   and|
+%|   $^:#H^2_$^:$&c0  .V^:#&c0!*2_,],M$^z^1_$^:$&c0  a^:#&c0!*1|
+%|_<c!$1)%# b'4$^J^1_,L'b M,L$^J(!nd}_}& b!( b"0 b#8 b$@ b%H b&P!WW}}|
+%|$^:$&c0  .V^:#&c0!*2_:" : ;8/<:#;bP8eq,Zampdds: ;8/=;bP8-;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align}~{\rm r}{\rm e}{\rm a}{\rm l}~{\rm p}{\rm a}{\rm r}{\rm t}&=-{z}_{1}{\alpha }_{1}\left({{J}_{1},\cdots,{J}_{nd}}\right){\partial }_{1}\ ~~~{\rm a}{\rm n}{\rm d} ~~~{H}_{2}{\partial }_{2}=
+-{z}_{1}{\alpha }_{1}\left({{J}_{1},\cdots,{J}_{nd}}\right){\partial }_{2} \label{eq:ampdds}\end{align}
+
+Finally in the absence of a cavity, the longitudinal normal form, in the Bmad units, have the form:
+%
+%]|Expr|[#b @`b___});# b'4" Chicago^: ;bP8&c0!*-="!Monaco^:! $|
+%|^H^5_<2^""Symbol^:"&c0  .V(".V$^"#*|:#&c0!*z^5_}}"$Helvetica|:$,F,]|
+%|$^:#z^6_:"&c0  f<c!$1)%# b'4$^:#&c0!*J^1_,L$^J^2_,[$^z^6_|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}}$^:"&c0  .V^:#&c0!*1_ :!   and|
+%|   $^:#H^6_,]0:$ : ;8/<:#;bP8eq,Zampdphs: ;8/=;bP8-;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align}~{{\rm H}}_{{\rm 5}}{\partial  \over \partial {z}_{5}}&={z}_{6}\phi \left({{J}_{1},{J}_{2};{z}_{6}}\right){\partial }_{1}\ ~~~{\rm a}{\rm n}{\rm d} ~~~{H}_{6}=
+0 \label{eq:ampdphs}\end{align}
+In \Eq{eq:ampdphs}, $\phi$ is the phase/time slip. $z_5$ is the time in the units of Bmad and $z_6$ is $\delta p \over p_0$---- a conserved quantity.
+
+The \vn{c_vector_field} of \Eq{eq:lied} is stored in the field \vn{c_normal_form%H}.
+
+It is also possible to leave a resonance in the map via a normal form: please look into reference\cite{thenewbook}.   If the normal form $\cal D$ is not a rotation then in FPP it can be written as
+%
+%]|Expr|[#b @`b___})4# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|: D""*|:" ,] :!-<exp<c!$1(%$^:"H(!nl}_"#Symbol^:#&c0  /7/1:"&c0!*,K|
+%|$^q(!nl}_}}:!-<exp<c!$1(%$^:"H^l_:#&c0  /7/1:"&c0!*,K$^q^l_}}|
+%|:!  : ;8/<:";bP8eq,Zlienf: ;8/=;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} {\cal D}\ =
+\ \exp\left({{H}_{nl}\cdot \nabla +{q}_{nl}}\right)\exp\left({{H}_{l}\cdot \nabla +{q}_{l}}\right)  \label{eq:lienf}\end{align}
+
+These vector fields are stored in \vn{c_normal_form%h_nl} and \vn{c_normal_form%h_l}.
+
+
+
+
+  \subsection{Call to the normal form}\label{s:callnorm}
+
+
+
+\begin{code}
+subroutine c_normal(xyso3,n,dospin,no_used,rot,phase,nu_spin,canonize)
+   
+type(c_damap) , intent(inout) :: xyso3    ! map to be normalized
+type(c_normal_form), intent(inout) ::  n
+type(c_damap), optional :: rot  !  normal form rot=n%Atot**(-1)*xy*n%Atot
+type(c_taylor), optional :: phase(:),nu_spin
+logical(lp), optional :: dospin,canonize
+integer,optional :: no_used
+\end{code}
+
+
+\vn{dospin} is false by default: spin is ignored.  In the symplectic case, \vn{phase(1:nd)} will contain the tunes. If the last plane, 3 in Bmad, is not oscillating, this contains the time slip.   If \vn{canonize} is true, the map \vn{n%atot} is put in a special form, i.e., the Courant-Snyder-Teng-Edwards form in the linear case (see \cite{thenewbook}).
+
+The normalization is done to order\vn{no} of the algebra $\prescript{}{no}{D}_{nv}$.   But we can perform the normalization to lower order: this is specified by \vn{no_used}. To perform a normalization to higher order than \vn{no} is possible but it is very unusual: for that the map has to be stored in a ``\vn{c_universal_taylor'}' and then the TPSA package has to be re-initialized to higher order. 
+
+Finally the type \vn{c_normal_form}  has structures which can be modified in order to change the calculation.  Here is the list assuming that \vn{n} is a \vn{c_normal_form}:
+
+
+\begin{itemize} 
+\item If \vn{n%nres=0}, the maps are turns into rotations and perhaps a time slip if no cavity are present.
+\item If \vn{n%nres}$/=0$, then \vn{n%nres} resonances, labelled by $k$,  are left in the map:
+%
+%]|Expr|[#b @`b___})b B# b'4" Chicago^: ;bP8&c0!*-="!*|:!n,Em,H|
+%|1,Lk,I$^""Symbol^:"&c0  n^:!&c0!*1_,K'b M,Kn,Em,Hndharm,Lk,I$|
+%|^:"&c0  n(!:!&c0!*ndharm}_,Kn,Ems,Hk,I$^:"&c0  n(!:!&c0!*spin}|
+%|_,]"#Monaco^:#integer"$Helvetica|:$ : -;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align}n\%m(1,k){\nu }_{1}+\cdots+n\%m(ndharm,k){\nu }_{ndharm}+n\%ms(k){\nu }_{spin}=
+{\rm i}{\rm n}{\rm t}{\rm e}{\rm g}{\rm e}{\rm r} \end{align}
+%
+\vn{ndharm} is the number of oscillating plane, typically 2 or 3 in Bmad. If a magnet is modulated, then \vn{ndharm} is increased by 1, the tune of the modulation enters in the modulation.
+
+\item If \vn{n%positive=.false.}, the fractional part of the tune  stored in \vn{n%tune} is between $-1/2,1/2$. This does not apply to the time/phase slip. 
+This is useful in ``one-resonance'' normal form.
+
+\item \vn{force_spin_input_normal} is a global which is normally false. If true, it makes the optional parameter \vn{dospin} obligatory.
+
+\item As pointed out above, the parameter \vn{remove_tune_shift} is  false by default. On a very damped map, one can set this parameter to true. The normal form is a linear sink around the origin. It is not recommended in accelerators. 
+
+\end{itemize}
+
+  \subsection{Factorizing the map \vn{n\%atot} }   \label{s:canon}
   
-  
-  
-  
-  
-  
+   Any Taylor map $a$ can be factorized as follows:
+ %
+%]|Expr|[#b @`b___})8# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|""*|:"a:!,F,]$^:"a^0_"#Symbol^:#&c0  .P$^:"&c0!*a^1_:#&c0  .P|
+%|$^:"&c0!*a^2_:#&c0  .P$^:"&c0!*a^s_"$Monaco^:$ if dir,]1 : ;8/<|
+%|:";bP8eq,Zafac: ;8/=;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} a&={a}_{0}\circ {a}_{1}\circ {a}_{2}\circ {a}_{s}~{\rm i}{\rm f}~{\rm d} {\rm i}{\rm r}={\rm 1}~\label{eq:afac}\end{align}
+using the command
+
+\begin{code}
+!# at = a_0 o a_1 o a_2 o a_s  for dir=1
+ call c_full_factorise(at,as,a0,a1,a2,dir=1) 
+\end{code}
+
+If \vn{dir=-1}, the order is reverse.
+
+
+This factorization is general. However we can explain it in the context of a normal form
+where it is useful for finding the lattice functions around the parameter dependent closed orbit.
+%
+%
+%]|Expr|[#b @`b___})b J# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|""*|:"n:!,F,]$^:"a_(",M1}"#Symbol^:#&c0  .P:"&c0!*m:#&c0  .P:"&c0!*a|
+%|: ;bP;/":!;bP8 ,F,]$^:"a^s(",M1}:#&c0  .P$^:"&c0!*a^2(",M1}:#&c0  .P|
+%|$^:"&c0!*a^1(",M1}:#&c0  .P<c%"C^<cY A(%$^:"&c0!*a^0(",M1}:#&c0  .P|
+%|:"&c0!*m:#&c0  .P$^:"&c0!*a^0_}}^$^m^c__}:#&c0  .P$^:"&c0!*a^|
+%|1_:#&c0  .P$^:"&c0!*a^2_:#&c0  .P$^:"&c0!*a^s_: ;bP;/":!;bP8,F,]|
+%|$^:"a^s(",M1}:#&c0  .P$^:"&c0!*a^2(",M1}:#&c0  .P<c%"C^<cY A(%|
+%|$^:"&c0!*a^1(",M1}:#&c0  .P$^:"&c0!*m^c_:#&c0  .P$^:"&c0!*a^1|
+%|_}}^$^n^c__}:#&c0  .P$^:"&c0!*a^2_:#&c0  .P$^:"&c0!*a^s_: ;8/<|
+%|:";bP8eq,Zfacnorm: ;8/=;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} n&={a}^{-1}\circ m\circ a\nonumber \\
+ &={a}_{s}^{-1}\circ {a}_{2}^{-1}\circ {a}_{1}^{-1}\circ \underbrace{{a}_{0}^{-1}\circ m\circ {a}_{0}}\limits_{{m}_{c}}^{}\circ {a}_{1}\circ {a}_{2}\circ {a}_{s}\nonumber \\
+&={a}_{s}^{-1}\circ {a}_{2}^{-1}\circ \underbrace{{a}_{1}^{-1}\circ {m}_{c}\circ {a}_{1}}\limits_{{n}_{c}}^{}\circ {a}_{2}\circ {a}_{s}\label{eq:facnorm}\end{align}
+
+
+\begin{enumerate} 
+\item The map $a_0$ is the identity in the harmonically oscillating parts of phase space, either 4 (no cavity) or 6 (with RF cavity).  It brings the map to the parameter dependent  fixed point where $\delta $, if constant, is included.
+\item The map $a_1$ turns the linear part of the map around the fixed , to all orders in the parameters, into a rotation.
+\item The map $a_2$ is purely nonlinear.
+\end{enumerate} 
+
+
+An example of this useful call is in program  \vn{z_track_normal_fact.f90}. This example computes  the so-called beta function in two different ways using $a_1$,  First if defines $a_1$ as the coefficient of $p_x^2$ in the quadratic invariant. Secondly it defines it has the coefficient of $J_1$ in the computation of $<x^2>$. In the Ripken formalism, these are the same functions.
+
+ \begin{code}
+!# normal_form%atot = a_0 o a_1 o a_2 o a_s  for dir=1
+call c_full_factorise(normal_form%atot,as,a0,a1,a2,dir=1) 
+
+! computing the "beta function" two different ways
+! x^2+p^2 is invariant of normal form n
+ct=(1.d0.cmono.'2')+(1.d0.cmono.'02')
+! (x^2+p^2) o a^-1 is invariant around the fixed point
+ct=ct*a1**(-1)
+allocate(jindex(c_%nd2harm))
+call clean(ct,ct,prec=prec)
+jindex=0
+jindex(2)=2
+ct=ct.par.jindex
+Write(6,*) "Beta via Coefficient of p^2 in invariant"
+call print(ct)
+!  function x^2 is constructed
+ct=(1.d0.cmono.'2')
+!  function x^2 is averaged using a_1
+call C_AVERAGE(ct,a1,ct) 
+jindex=0
+jindex(1)=1
+jindex(2)=1
+!  coefficient of J_1 extracted
+ct=ct.par.jindex
+call clean(ct,ct,prec=prec)
+write(6,*) " Beta via average "
+call print(ct)
+\end{code}
+
+The result if \vn{no=3}  is:
+
+ \renewcommand{\codefont}{\footnotesize}
+\begin{code}
+ Beta via Coefficient of p^2 in invariant
+
+          1, NO =    3, NV =    7, INA =  209
+ *********************************************
+
+    I  COEFFICIENT          ORDER   EXPONENTS
+      NO =     3      NV =     7
+   0   13.57348336645041       0.000000000000000       0  0  0  0  0  0  0
+   1   25.47460380089213       0.000000000000000       0  0  0  0  1  0  0
+   1  -7.011940286158579       0.000000000000000       0  0  0  0  0  1  0
+   1  0.9489986322495689       0.000000000000000       0  0  0  0  0  0  1
+    -4   0.000000000000000       0.000000000000000       0  0  0  0  0  0  0
+  Beta via average
+
+          1, NO =    3, NV =    7, INA =  209
+ *********************************************
+
+    I  COEFFICIENT          ORDER   EXPONENTS
+      NO =     3      NV =     7
+   0   13.57348336645041       0.000000000000000       0  0  0  0  0  0  0
+   1   25.47460380089214       0.000000000000000       0  0  0  0  1  0  0
+   1  -7.011940286158588       0.000000000000000       0  0  0  0  0  1  0
+   1  0.9489986322495378       0.000000000000000       0  0  0  0  0  0  1
+    -4   0.000000000000000       0.000000000000000       0  0  0  0  0  0  0
+\end{code}
+ \renewcommand{\codefont}{\small}
+
+  \subsection{Putting a transformation in ``canonical'' form  }   \label{s:canonize}
+ 
+ 
+ If the normal form $n$ is free of resonance driving terms, then it commutes with any similar normal forms.
+ This means that we can multiply $a$ by a rotation (phase slip and/or damping depending on the case).
+%
+%]|Expr|[#b @`b___})b E# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|""*|:"n :!,F,]$^:"a_(",M1}"#Symbol^:#&c0  .P:"&c0!* m :#&c0  .P|
+%|:"&c0!*a :#&c0  />:"&c0!* n,]$^r_(",M1}:#&c0  .P$^:"&c0!*a_("|
+%|,M1}:#&c0  .P:"&c0!* m :#&c0  .P<c%"C^<cY A($:"&c0!*a:#&c0  .P|
+%|:"&c0!*r}}^$^a^c__}     : ;8/<:";bP8eq,Znormalff: ;8/=;bP8-;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} n\ &={a}^{-1}\circ \ m\ \circ a\ \Rightarrow \ n=
+{r}^{-1}\circ {a}^{-1}\circ \ m\ \circ \underbrace{a\circ r}\limits_{{a}_{c}}^{}\ \ \ \ \ \label{eq:normalff}\end{align}
+
+
+
+
+In accelerator physics, we often desire a special form for the canonical transformation $a$.  This special form is of special significance in the linear case, i.e., the map $a_1$ of  (\sref{s:canon}).  Namely, we require that the matrix of $a_c$, denoted by $A$, obeys:
+%
+%]|Expr|[#b @`b___})9# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|$^""*|:"A(!12}_,]$^A(!34}_,]0:! "#Monaco^:#  and  $^:"A(!11}_|
+%|,L$^A(!33}_,^0 : ;8/<:";bP8eq,Zcste: ;8/=;bP8-;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} {A}_{12}=
+{A}_{34}=
+0 ~~{\rm a}{\rm n}{\rm d} ~~{A}_{11},{A}_{33}>0\ \label{eq:cste}\end{align}
+
+%
+
+If we select the transformation $a_c$ according to \Eq{eq:cste}, then the phase difference of two position monitors will  be the Hamiltonian phase advance. There is no known extension of this property\footnote{It should be possible to investigate this in 1-d-f without too much trouble.} to the nonlinear problem: FPP, for the nonlinear part,  selects $a$ using an arbitrary construction explained in reference \cite{thenewbook}. 
+
+Obviously if the longitudinal plane is oscillating, the same condition can be applied : $A_{56}=0$.  In the case of a phase slip, we do something else (See routine . \vn{extract_a0} in \vn{Ci_tpsa.f90} or section 7.3 of reference \cite{thenewbook}).   
+
+We refer to \Eq{eq:cste} as the Courant-Snyder(-Teng-Edwards)'s condition.  As for the other planes, spin and nonlinear effects, our choice is, at present,  arbitrary (see reference \cite{thenewbook}).
+
+There are two calls to ``canonize'': a nonlinear routine and a faster linear routine for standard usage.
+
+\subsubsection{Nonlinear Call }\label{s:canonise}
+
+The full call is given by:
+
+ \renewcommand{\codefont}{\footnotesize}
+
+\begin{code}
+type(c_damap) a0,as,a1,a2,a_cs,rot,a_tracked
+type(c_taylor) phase(3),phase_spin
+	.
+	.
+	.
+	
+!  Usual computation of a Taylor maps within TC
+ray_TC=x0   !  For TC
+identity_AP=1
+ray_8_TC=ray_TC + identity_AP ! Connect AP with TC: identity added
+ 
+p=>ring%start
+call propagate(ray_8_TC,bmad_state,fibre1=p) !  TC of PTC proper
+ 
+one_turn_map_AP=ray_8_TC
+
+ 
+! compute 2 tunes and the phase slip
+call c_normal(one_turn_map_AP,normal_form,phase=phase,dospin=bmad_state%spin) ! #1
+ 
+write(6,*) "Transverse tunes "
+write(6,"(3(1x,g17.10,1x))") normal_form%tune(1:c_%nd)
+ 
+ 
+
+
+!!!! Canonize  !!!!
+  phase(1)=0.d0
+  phase(2)=0.d0
+  phase(3)=0.d0
+phase_spin=0.d0
+
+call c_full_canonise(normal_form%atot,a_cs)  !  initial A ! #2
+!  Usual computation of a Taylor maps within TC
+ray_TC=x0   !  For TC
+ray_8_TC=ray_TC + a_cs ! Connect AP with TC: identity added
+ 
+p=>ring%start
+call propagate(ray_8_TC,+bmad_state,fibre1=p,fibre2=p2) !  TC of PTC proper ! #3a
+a_tracked=ray_8_TC
+
+	.
+	.
+	.
+call c_full_canonise(a_tracked,a_cs,as=as,a0=a0,a1=a1,a2=a2,rotation=rot  & ! #3b
+,phase=phase,nu_spin=phase_spin)
+\end{code}
+ \renewcommand{\codefont}{\small}
+
+The map \vn{a_tracked}  is now:
+
+\begin{code}
+a_tracked=as*a0*a1*a2*rot=a_cs*rot
+\end{code}
+
+
+In the above code fragment, which is in \vn{z_track_normal_fact.f90}, there three important steps.  
+
+\begin{enumerate}
+\item At \# 1, the one-turn map is normalized. In FPP, the normalization map is \vn{normal_form%atot}. 
+No special attention if given to that map except that it produces a normal form.
+
+\item At \# 2, the map is put in a special form denoted \vn{a_cs}.  In the linear case, it is given by \Eq{eq:cste}.
+
+\item At \# 3a, the canonical transformation \vn{a_cs} is tracked by the code PTC from \vn{fibre1} to \vn{fibre2}.  It is extremely important to realize that what PTC is in detail, what a fibre is in detail is irrelevant. The code PTC could be full of bugs, full of errors of physics, etc\ldots    This particular call works for any tracking code--- in fact people reading this manual should try writing a little code and convince themselves.
+
+\item At \# 3b, the object tracked by the code PTC, after having been converted into a \vn{c_damap}, is now rotated into the form of \Eq{eq:cste}. The angles of that rotation, here \vn{rot}, are the phase advances (or time slip) between the positions represented by \vn{fibre1} and \vn{fibre2}. They are stored in \vn{phase(1:3)}  and \vn{phase_spin}.   
+
+\end{enumerate}
+
+ 
+
+\subsubsection{Linear fast call phase_spin and type ~\vn{c_linear_map}}\label{s:fastcanonise}
+
+For a typical calculation, we want to be fast. For this purpuse we have a type \vn{c_linear_map}.
+
+\begin{code}
+type c_linear_map
+ complex(dp) mat(6,6)         ! orbital
+ complex(dp)  q(0:3,0:6)      ! spin 
+end type c_linear_map
+\end{code}
+ 
+ The field  \vn{c_linear_map%q}  
+ contains the four quaternions  components  in \vn{q(0:3,0)}.   The orbital dependence is in \vn{q(0:3,1:6)}.  
+ 
+ \begin{code}
+ 
+ 
+call c_fast_canonise(normal_form%atot,a_cs,dospin=bmad_state%spin)   
+
+ p2=>ring%start
+ call move_to(ring,p2,"SF",reset=.true.)   !  Locating SF in TC
+ 
+
+ !  Usual computation of a Taylor maps within TC
+ray_TC=x0   !  For TC
+ray_8_TC=ray_TC + a_cs ! Connect AP with TC: identity added
+ 
+p=>ring%start
+ 
+call propagate(ray_8_TC,bmad_state,fibre1=p,fibre2=p2) !  TC of PTC proper
+
+ a_tracked=ray_8_TC
+ 
+ 
+call c_fast_canonise(a_tracked,a_cs,phase=pha,damping=damp,q_cs=q_cs, &
+q_as=q_as,q_orb=q_orb,q_rot=q_rot,spin_tune=spin_tune ,dospin=bmad_state%spin)
+ 
+end type c_linear_map
+\end{code}
+
+
+
   \section{more...}
 
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   
 %--------------------------------------------------------------------------------------------------------

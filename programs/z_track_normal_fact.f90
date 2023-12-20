@@ -13,26 +13,32 @@ type(c_normal_form) normal_form
 integer i,j,k, case_section
 type(probe_8) xs  
 !!!!!!!!!!!!!!!!!!!!!
-type(fibre), pointer :: p 
+type(fibre), pointer :: p,p2
 type(probe) ray_TC 
 type(probe_8) ray_8_TC
-type(c_damap)  one_turn_map_AP, identity_AP,two_turn_map_AP,lagrange_map_ap
-type(c_damap) go_to_orbit
-real(dp)  closed_orbit(6),goal(9),entrance_orbit(6)
+type(c_damap)  one_turn_map_AP, identity_AP,two_turn_map_AP,lagrange_map_ap,u_c
+type(c_damap) a0,as,a1,a2,a_cs,rot,a_tracked
+type(c_damap) U,Q,U_0,U_1,U_2
+type(c_linear_map) q_cs,q_as,q_rot,q_orb  
+real(dp)  pha(3),damp(3)
+real(dp)  spin_tune(2)
+type(c_vector_field) fc
+real(dp)  closed_orbit(6),goal(9),entrance_orbit(6),nu_spin
 type(internal_state),target :: bmad_state
-type(c_taylor) ct,phase(3),eq(9)  
+type(c_taylor) ct 
+type(c_taylor) phase(3),phase_spin
 type(c_universal_taylor) tpos(9)  
-type(c_damap) f_map,c_w0_inv,c_w0
 integer ignore_closed_orbit
 integer npmax
+integer, allocatable :: jindex(:)
 real nave
 
 c_verbose=.false.
 prec=1.d-10 ! for printing
 use_info=.true.
 use_quaternion=.true.
- c_lda_used=1000
- lda_used=1000
+ c_lda_used=2000
+ lda_used=2000
  n_cai=-i_
 preffile= "C:\document\etienne_programs_new\programs_for_learning\suntao\3nuy\pref.txt"
 
@@ -50,9 +56,10 @@ ring=>m_u%start
 
 call make_node_layout(ring)
  
-call in_bmad_units()
+!call in_bmad_units()
 
-bmad_state=only_4d
+bmad_state=only_4d0+delta0+spin0
+bmad_state=nocavity0+spin0
 
 p=>ring%start
 call move_to(ring,p,"QF1")   !  Locating QF1 in TC
@@ -67,23 +74,19 @@ write(6,*) " closed orbit "
 write(6,"(6(1x,g11.4))") closed_orbit
  x0=closed_orbit
 
-write(6,*) " For TPSA map around f=(0,...,0) type 1 "
-write(6,*) " For DA map around closed orbit type 0 "
-read(5,*) ignore_closed_orbit 
-write(6,*) " Give order no "
+
+write(6,*) " Give order no >=2 for beta "
 read(5,*) no
-if(ignore_closed_orbit==1) then
- x0=0
-endif
+
 
 !!!!!!  calling TC !!!!!!
 np=2     ! number of free parameters to solve these equations
 call init(bmad_state,no,np)   ! Berz's TPSA package is initialized
 nV=c_%nv   !     
-call alloc(ct)  
-call alloc(identity_AP,one_turn_map_AP,f_map,c_w0_inv,c_w0,go_to_orbit);
+call alloc(ct,phase_spin)  
+call alloc(identity_AP,one_turn_map_AP,a0,as,a1,a2,a_cs,rot,a_tracked,u_c);
 call alloc(normal_form);
-call alloc(ray_8_TC);call alloc(phase);call alloc(eq)
+call alloc(ray_8_TC);call alloc(phase) 
 p=>ring%start
    
 !  Usual computation of a Taylor maps within TC
@@ -96,54 +99,18 @@ call propagate(ray_8_TC,+bmad_state,fibre1=p) !  TC of PTC proper
  
 one_turn_map_AP=ray_8_TC
 
-if(ignore_closed_orbit==1) then
-!   Compute TPSA closed orbit
-one_turn_map_AP%x0(1:c_%nd2)=x0(1:c_%nd2)
-c_w0%x0(1:c_%nd2)=x0(1:c_%nd2)
 
-!!! inversion only need in the transverse plane in this example
-do i=1,c_%nd2
- c_w0%v(i)=one_turn_map_AP%v(i)-(1.d0.cmono.i)-one_turn_map_AP%x0(i)
-enddo
- 
- c_w0_inv=c_w0.oo.(-1)
-
-f_map%x0=0
-do i=1,c_%nd2
-f_map%v(i)=0.d0
-f_map=c_w0_inv.o.f_map
-enddo
-
-f_ray=0
-f_ray=c_w0_inv.o.f_ray
- 
-! Similarity transformation to the closed orbit
- 
-go_to_orbit= 1
-go_to_orbit%x0(1:c_%nd2)=f_ray%x(1:c_%nd2)
-do i=1,c_%nd2
- go_to_orbit%v(i)= go_to_orbit%v(i)+f_ray%x(i)
-enddo
- 
-one_turn_map_AP=(go_to_orbit.o.one_turn_map_AP).o.(go_to_orbit.oo.(-1))
-
- write(6,"(a18,6(1x,g11.4))") "Exact closed orbit",closed_orbit(1:c_%nd2)
- write(6,"(a18,6(1x,g11.4))") "TPSA  closed orbit",real(f_ray%x(1:c_%nd2))
-
-endif
 
 ! compute 2 tunes and the phase slip
-call c_normal(one_turn_map_AP,normal_form,phase=phase) 
-ray_TC=ray_8_TC
+call c_normal(one_turn_map_AP,normal_form,phase=phase,dospin=bmad_state%spin) 
+ 
 write(6,*) "Transverse tunes "
 write(6,"(3(1x,g17.10,1x))") normal_form%tune(1:c_%nd)
-write(6,*) "Dampings (numerical noise)"
-write(6,"(3(1x,g17.10,1x))") normal_form%damping(1:c_%nd)
  
-
 call clean(normal_form%H_l,normal_form%H_l,prec=prec)
 call clean(normal_form%H_nl,normal_form%H_nl,prec=prec)
 
+ 
 !
 write(6,*) 
 write(6,*) "z_1-component of the Linear Vector Field in Phasors Variables  "
@@ -153,7 +120,206 @@ write(6,*) "z_1-component of the Non-Linear Vector Field in Phasors Variables (2
 call print(normal_form%H_nl%v(1).cut.4)
 
 
+if(no>1) then
+
+!# a_t = a_0 o a_1 o a_2 o a_s  for dir=1
+call c_full_factorise(normal_form%atot,as,a0,a1,a2,dir=1) 
+
+! computing the "beta function" two different ways
+! x^2+p^2 is invariant of normal form n
+ct=(1.d0.cmono.'2')+(1.d0.cmono.'02')
+! (x^2+p^2) o a^-1 is invariant around the fixed point
+ct=ct*a1**(-1)
+allocate(jindex(c_%nd2harm))
+call clean(ct,ct,prec=prec)
+jindex=0
+jindex(2)=2
+ct=ct.par.jindex
+Write(6,*) "Beta via Coefficient of p^2 in invariant"
+call print(ct)
+!  function x^2 is constructed
+ct=(1.d0.cmono.'2')
+!  function x^2 is averaged using a_1
+call C_AVERAGE(ct,a1,ct) 
+jindex=0
+jindex(1)=1
+jindex(2)=1
+!  coefficient of J_1 extracted
+ct=ct.par.jindex
+call clean(ct,ct,prec=prec)
+write(6,*) " Beta via average "
+call print(ct)
+
+endif
+
+!!!! Canonize  !!!!
+  phase(1)=0.d0
+  phase(2)=0.d0
+  phase(3)=0.d0
+phase_spin=0.d0
+
+!  Only necessary for phase advance 
+call c_full_canonise(normal_form%atot,a_cs)
  
+p2=>ring%start
+call move_to(ring,p2,"SF",reset=.true.)   !  Locating SF in TC
+ 
+!  Usual computation of a Taylor maps within TC
+ray_TC=x0   !  For TC
+ray_8_TC=ray_TC + a_cs ! Connect AP with TC: identity added
+ 
+p=>ring%start
+call propagate(ray_8_TC,+bmad_state,fibre1=p,fibre2=p2) !  TC of PTC proper
+a_tracked=ray_8_TC
+
+
+call c_full_canonise(a_tracked,a_cs,as=as,a0=a0,a1=a1,a2=a2,rotation=rot  &
+,phase=phase,nu_spin=phase_spin)
+call clean(as,as,prec=prec)
+
+ 
+call clean(a0,a0,prec=prec)
+call clean(a1,a1,prec=prec)
+call clean(a2,a2,prec=prec)
+call clean(a_cs,a_cs,prec=prec)
+call clean(phase,phase,prec=prec)
+call clean(phase_spin,phase_spin,prec=prec)
+
+write(6,*) " Spin transformation "
+call print(as)
+write(6,*) " Fixed point transformation "
+call print(a0)
+write(6,*) " Linear transformation "
+call print(a1)
+write(6,*) " Nonlinear transformation "
+call print(a2)
+write(6,*) " Canonized transformation "
+call print(a_cs)
+write(6,*) " Phase Advance map"
+call print(rot)
+write(6,*) " Transverse phase advance "
+call print(phase(1:3))
+pause 654
+write(6,*) " Spin phase advance "
+call print(phase_spin)
+ 
+call kill(ct,phase_spin)  
+call kill(identity_AP,one_turn_map_AP,a0,as,a1,a2,a_cs,rot,a_tracked,u_c);
+call kill(normal_form);
+call kill(ray_8_TC);call kill(phase); 
+call kill_para(ring)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!  calling TC !!!!!!
+np=0
+no=1
+call init(bmad_state,no,np)   ! Berz's TPSA package is initialized
+nV=c_%nv   !     
+call alloc(ct,phase_spin)  
+call alloc(identity_AP,one_turn_map_AP,a0,as,a1,a2,a_cs,rot,a_tracked,u_c);
+call alloc(normal_form);
+call alloc(ray_8_TC);call alloc(phase); 
+p=>ring%start
+   
+!  Usual computation of a Taylor maps within TC
+ray_TC=x0   !  For TC
+identity_AP=1
+ray_8_TC=ray_TC + identity_AP ! Connect AP with TC: identity added
+ 
+p=>ring%start
+call propagate(ray_8_TC,bmad_state,fibre1=p) !  TC of PTC proper
+ 
+one_turn_map_AP=ray_8_TC
+
+ 
+! compute 2 tunes and the phase slip
+call c_normal(one_turn_map_AP,normal_form,phase=phase,dospin=bmad_state%spin) 
+ 
+write(6,*) "Transverse tunes "
+write(6,"(3(1x,g17.10,1x))") normal_form%tune(1:c_%nd)
+ 
+ 
+
+
+
+!!!! Canonize  !!!!
+pha=0
+damp=0
+spin_tune=0
+
+!  Only necessary for phase advance 
+!call c_full_canonise(normal_form%atot,a_cs)
+call c_fast_canonise(normal_form%atot,a_cs,dospin=bmad_state%spin)  !,phase=pha,damping=damp,q_cs,q_as,q_orb,q_rot,spin_tune ,dospin)
+ 
+ p2=>ring%start
+ call move_to(ring,p2,"SF",reset=.true.)   !  Locating SF in TC
+ 
+
+ !  Usual computation of a Taylor maps within TC
+ray_TC=x0   !  For TC
+ray_8_TC=ray_TC + a_cs ! Connect AP with TC: identity added
+ 
+p=>ring%start
+ 
+call propagate(ray_8_TC,bmad_state,fibre1=p,fibre2=p2) !  TC of PTC proper
+
+ a_tracked=ray_8_TC
+ 
+ 
+call c_fast_canonise(a_tracked,a_cs,phase=pha,damping=damp,q_cs=q_cs, &
+q_as=q_as,q_orb=q_orb,q_rot=q_rot,spin_tune=spin_tune ,dospin=bmad_state%spin)
+ 
+ 
+write(6,*) " Spin transformation "
+call print(q_as)
+write(6,*) " Linear transformation "
+call print(q_orb)
+ 
+write(6,*) " Canonized transformation "
+call print(q_cs)
+write(6,*) " Phase Advance map"
+call print(q_rot)
+write(6,*) " Transverse phase advance "
+write(6,format3) pha
+write(6,*) " Spin phase advance "
+write(6,format2) spin_tune
+ 
+
+
+q_rot=q_as*q_orb
+
+call print(q_rot)
+
+call print(a_cs%q)
+
+
+
+call kill(ct,phase_spin)  
+call kill(identity_AP,one_turn_map_AP,a0,as,a1,a2,a_cs,rot,a_tracked,u_c);
+call kill(normal_form);
+call kill(ray_8_TC);call kill(phase); 
+ 
+
+
+!!!!!!!!!!!!!!!!!
+stop 1000
+normal_form%H=0.01d0*normal_form%H
+a1=exp(normal_form%H)
+a1=c_phasor()*a1*ci_phasor()
+call clean(a1,a1,prec=prec)
+call alloc(fc)
+Fc=-c_logf_spin(a1)
+ 
+a2=exp(fc,a1)
+ 
+call clean(a2,a2,prec=prec)
+call print(a2) 
+ 
+!!!!   making map near identity
+
+
+
+
+
 1000 call ptc_end(graphics_maybe=1,flat_file=.false.)
 contains
 
