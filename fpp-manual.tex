@@ -76,6 +76,10 @@
 
 \def\ta{http://www.takafumi.org/etienne/new_pages/simple_programs/}
 \def\tb{http://www.takafumi.org/etienne/new_pages/maps/}
+\def\tc{http://www.takafumi.org/etienne/new_pages/programs/}
+\def\td{http://www.takafumi.org/etienne/new_pages/universal_taylor/}
+ 
+\def\tdemo{http://www.takafumi.org/etienne/new_pages/my_demo_package/}
 
 \newcounter{mytable}
 \Alph{mytable}
@@ -98,7 +102,7 @@
  
 \phantomsection
 \pdfbookmark[1]{Cover Page}{Cover Page}
-\maketitle
+%\maketitle
 
 \cleardoublepage
 \phantomsection
@@ -501,20 +505,18 @@ $F\cdot \nabla $
  & Logarithm of a map (look at link for optional variables) & \href{\tb z_vf_cut_sub.f90}{F=ln(M)} \\
   & & \\
  \hline
-\multirow{3}{*}{ \refstepcounter{mytable} \themytable}
- & & \\
- & Transforming a vector field with a vector field& \href{\tb z_vf_Lie_sub.f90}{F=exp_ad( F,F')}\\
-  & & \\
- \hline
-\multirow{3}{*}{ \refstepcounter{mytable} \themytable}
- & & \\
+\multirow{3}{*}{ \refstepcounter{mytable}\label{t1:vect}\themytable}
  & 
 %
-%]|Expr|[#b @`b___})/# b'4" Helvetica|: ;bP8&c0!*,D"!Chicago^:!A|
+%]|Expr|[#b @`b___})## b'4" Helvetica|: ;bP8&c0!*,D["" (."!Chicago^:!A|
 %|<c!$1()""Times|:"F"#Symbol^:#&c0  /7/1"$*|:$&c0!*,K: -<hat-[:$f|
 %|: -]}}$^:!A_(": ,M1},]:$ <c$4Q^F}:#&c0  /7/1:$&c0!*,K: -<hat-[|
-%|<c$4Q^:$f}: -],D}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
-${\cal A}\left({F\cdot \nabla +\hat{f}}\right){{\cal A}}^{-1}=\ \widetilde{F}\cdot \nabla +\hat{\widetilde{f}}$
+%|<c$4Q^:$f}: -]}_(%:!A:$,]: -<exp<c!$1(%$^:$F^a_:#&c0  /7/1:$&c0!*,K|
+%|$^q^:#&c0  a_}}}_}: &c0!*,D}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+$\begin{array}{cc}{\cal A}\left({F\cdot \nabla +\hat{f}}\right){{\cal A}}^{-1}=\ \widetilde{F}\cdot \nabla +\hat{\widetilde{f}}&\\
+{\cal A}=
+\exp\left({{F}_{a}\cdot \nabla +{q}_{\alpha }}\right)&\end{array}$
+
 %
 %]|Expr|[#b @`b___})## b'4" Helvetica|: ;bP8&c0!*,D[#" )%# b'4|
 %|$^<c$4Q^"!*|:!F}^k_: ,]<c!$1(#$^:!F^i_$^""Symbol^:"&c0  .V^:!&c0!*i|
@@ -531,13 +533,113 @@ a~{\rm i}{\rm s}~{\rm t}{\rm h}{\rm e}~{\rm o}{\rm r}{\rm b}{\rm i}{\rm t}{\rm a
 \\
   & & \\
  \hline
+\multirow{3}{*}{ \refstepcounter{mytable} \themytable}
+ & & \\
+ & If $\cal A = $exp(F'$\cdot \nabla$) in item \ref {t1:vect}& \href{\tb z_vf_Lie_sub.f90}{F=exp_ad( F',F)}\\
+  & & \\
+ \hline
+\multirow{3}{*}{ \refstepcounter{mytable} \themytable}
+ & & \\
+ & Lie Bracket: exp_ad reprogrammed with .lb. & \href{\tb z_vf_Lie_sub.f90}{F=F.lb.F}\\
+  & & \\
+ \hline
+\multirow{3}{*}{ \refstepcounter{mytable} \themytable}
+ & & \\
+ & Tpsa and DA concatenation of \vn{c_damap}'s and powers (see \sref{s:datpsamaps})& %
+%
+%]|Expr|[#b @`b___})3# b'4" Helvetica|: ;bP8&c0!*,D-<href-[-<tc|
+%| z-?track-?da-?tpsa,Nf90-]-[["" )1# b'4M,]A,No,NM,L M,]M,Noo,N,H|
+%|n,I}& b!( b"0 b#8 b$@ b%H b&P!WW}_)-# b'4M,]A,N,J,NM,L M,]M,N,J,J,N,H|
+%|n,I}& b!( b"0 b#8 b$@ b%H b&P!WW}_} -],D|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+$\href{\tb z_track_da_tpsa.f90}{\begin{array}{cc}M=A.o.M, M=M.oo.(n)&\\
+M=A.*.M, M=M.**.(n)&\end{array} }$
+
+\\
+  & & \\
+ \hline
+\multirow{3}{*}{ \refstepcounter{mytable} \themytable}
+ & & \\
+ & M+M',M-M', r*M (r is real or complex) & \href{\tb z_simple_operations.f90}{M=A*M  and M=M**(n)}\\
+  & & \\
+ \hline
 
 \end{tabular}
 \end{center}
+
+ }
+
+\subsection{The type c_universal_taylor }\label{s:cuniversal}
+
+
+A taylor series produced by TC or a map analysed by FPP depends on the two versions of the TPSA package of Berz. One version deals intrinsically with real Taylor: this is \vn{c_dabnew.f90}. It is the package on which the polymorphs are used and therefore used by the code TC.  A complex taylor does exist but simply made of two real taylors
+\begin{code}
+  type complextaylor
+     type (taylor) r  ! Real part
+     type (taylor) i  ! Imaginary part
+  end type complextaylor
+\end{code}
+and similarily a complex polymorph exists and it is used in TC and it uses the above \hbox{\vn{complextaylor}}:
+\begin{code}
+  type complex_8
+     type (complextaylor) t
+     complex(dp) r
+     logical(lp) alloc
+     integer kind
+     integer i,j
+     complex(dp) s
+   end type complex_8
+\end{code}
+
+The other package, \vn{cc_dabnew.f90} is a version of Berz package which is intrisically complex. It is used in the analysis part of FPP namely \vn{Ci_tpsa.f90}. During a run of PTC or worse BMAD, we would like to store permanently some Taylor series.  This is not possible via Berz's package since they function with a given order and number of variables. For that purpose BMAD uses a type  \vn{universal_taylor} and AP uses the complex equivalent \vn{c_universal_taylor}. Since this manual is about analysis --- not BMAD--- we describe  the \vn{c_universal_taylor} via examples in a table.
+
+
+\setcounter{mytable}{0}
+{\footnotesize
+\begin{center}
+\begin{tabular}{|l|c|c|}
+\hline
+ & \mbox{\footnotesize   (t,f: c_taylor, M,A: c_damap and F,F': c_vector_field, uf,uf1: c_universal_taylor )}& Fortran Operator \\ \hline
+\multirow{3}{*}{ \refstepcounter{mytable}\label{t3:1}\themytable}
+ & & \\
+ & \mbox{\scriptsize Simple operations illustrated via a one-resoance normal form }&
+ \href{\td z_uni.f90}{ \mbox{\scriptsize .sub.~.par.~.d.}} \\
+  & & \\
+ \hline
+\multirow{3}{*}{ \refstepcounter{mytable}\label{t3:2}\themytable}
+ & & \\
+ & \mbox{\scriptsize Multiplicity of logarithms of maps and unversal taylors for Poisson brackets }& \href{\td z_vector_field_poisson.f90}{ \mbox{\scriptsize  get_field_c_universal_taylor(vf,uf1)}} \\
+  & & \\
+ \hline
+\multirow{3}{*}{ \refstepcounter{mytable}\label{t3:3}\themytable}
+ & & \\
+ & \mbox{\scriptsize Evaluation via .o. on c_universal_taylor(:) }&
+ \href{\td z_uni.f90}{ \mbox{\scriptsize uf.o.c_ray and uf(:).o.c_ray}} \\
+  & & \\
+ \hline
+\end{tabular}
+\end{center}
+
  }
 
 
+In item \ref{t3:2}, we compute the logarithm of map two different ways: via \vn{ln(c_damap)} and normal form. The logarithm can only be used on map near the identity.  Via the normal form, it is easy to generate an infinite number of logarithms for maps far from the identity by simply adding integer units of tune to the linear tune.
 
+In item  \ref{t3:3}, we substitute a type \vn{c_ray} into a inversal taylor or an array. An array can represent a map for example: not fast by very convenient. The type c_ray is:
+
+\renewcommand{\codefont}{\footnotesize}
+\begin{code}
+ type c_ray
+  complex(dp) x(lnv)            ! orbital and/or PTC magnet modulation clocks
+  type(complex_quaternion) q    ! quaternion
+  integer n                     ! of dimensions used in x(lnv)
+!  Obsolescent
+  complex(dp) s1(3),s2(3),s3(3) !# 3 spin directions
+ end type c_ray
+\end{code}
+\renewcommand{\codefont}{\small}
+
+If a \vn{c_ray}  is used with a \vn{c_damap}, the quaternion array will be filled with the resulting quaternion.
 
 
 %-------------------------------------------------------------------
@@ -841,7 +943,7 @@ This is exactly \Eq{eq:nodnvpm}.  We encourage the reader to compile the files a
 
 \section{DA and TPSA maps}\label{s:datpsamaps}
 
-The code for this section is located at \vn{z_track_da_tpsa.f90}.
+The code for this section is located at \href{\tc z_track_da_tpsa.f90}{\vn{z_track_da_tpsa.f90}}.
 
 A code like TC always produces TPSA objects by default. To make the explanations simple, we will assume here  that TC is tracking for one turn in a ring. The closed orbit in that case is a natural special orbit demanded by theory. For example, all textbooks assume some version of Hill's equation {\bf around the  ideal closed orbit} when discussing Courant-Snyder theory.
 
@@ -1601,7 +1703,7 @@ One additional issue is ``symplecticity'' which cannot be analyzed with a fake m
 
 \section{PTC examples of DA vs TPSA maps }\label{s:ptcmap} 
 
-The code for this section is located at \vn{z_track_map_code.f90}. If you run the code, you can select case 1,2,3 or 4 which correspond respectively to sections 
+The code for this section is located at \href{\tc z_track_map_code.f90}{\vn{z_track_map_code.f90}}.   If you run the code, you can select case 1,2,3 or 4 which correspond respectively to sections 
 (\sref{s:extmap}),  (\sref{s:exttay}), (\sref{s:lagmap}) and (\sref{s:lagmapt}).
 
 
@@ -2311,8 +2413,8 @@ The results are for the tunes, phase slip and the orbit:
 
  \section{Normalizing a TPSA map}\label{s:normdatpsa}
  
- 
- The code for this section is located at \vn{z_track_normal_tpsa.f90}. 
+
+ The code for this section is located at  \href{\tc z_track_normal_tpsa.f90}{\vn{z_track_normal_tpsa.f90}}.
  
   \subsection{Normalizing as a DA map around the closed orbit}\label{s:normda}
 
@@ -2688,7 +2790,7 @@ Everything that was said about \vn{taylor} in section (\sref{s:taylor}) applies 
 \begin{align} t\ &= t\%r\ +\ t\%s\ {\Delta }_{t\%i+nd2}~\label{eq:knobdef} \end{align}
 
 
-To understand these three instantiations of the \vn{real8/complex_8} types, we propose the  code \vn{z_track_real_8.f90}. Consider these fragments from the program  \vn{z_track_real_8.f90}:
+To understand these three instantiations of the \vn{real8/complex_8} types, we propose the  code \href{\tc z_track_real_8.f90}{\vn{z_track_real_8.f90}}.  Consider these fragments from the program  \vn{z_track_real_8.f90}:
 
 
 
@@ -3051,7 +3153,9 @@ end type c_damap
 \subsection{The \vn{c_} ~ type: storing global data for AP}
 \label{s:cunder}
 
-Before discussing the \vn{c_damap}, we need to understand a few parameters that are crucial to that map and are global in AP. We can show a code fragment that prints them in  particularly complex cases.  This is from the main program \vn{z_track_c_.f90}. 
+Before discussing the \vn{c_damap}, we need to understand a few parameters that are crucial to that map and are global in AP. We can show a code fragment that prints them in  particularly complex cases.  This is from the main program \href{\tc z_track_c_.f90}{\vn{z_track_c_.f90}}.
+
+
 
 There are two basic ways to track in TC: the RF-cavity is on or the RF-cavity is off. Even when RF cavity are absolutely necessary, it is useful to compute a 6-d map with the RF cavity off, i.e., with $\delta p = \rm constant$. Why?
 
@@ -3313,7 +3417,8 @@ end type c_normal_form
   
   \subsection{ The normal form type}\label{s:normalform}
   
-  See program \vn{z_track_normal_tpsa.f90} for a simple call to the normal form.
+  See program \href{\tc z_track_normal_tpsa.f90}{\vn{z_track_normal_tpsa.f90}}    for a simple call to the normal form.
+
   
   The normal form rewrites a \vn{c_damap} as follows:
 %
@@ -3680,7 +3785,7 @@ where it is useful for finding the lattice functions around the parameter depend
 \end{enumerate} 
 
 
-An example of this useful call is in program  \vn{z_track_normal_fact.f90}. This example computes  the so-called beta function in two different ways using $a_1$,  First if defines $a_1$ as the coefficient of $p_x^2$ in the quadratic invariant. Secondly it defines it has the coefficient of $J_1$ in the computation of $<x^2>$. In the Ripken formalism, these are the same functions.
+An example of this useful call is in program  \href{\tc  z_track_normal_fact.f90}{\vn{z_track_normal_fact.f90}} . This example computes  the so-called beta function in two different ways using $a_1$,  First if defines $a_1$ as the coefficient of $p_x^2$ in the quadratic invariant. Secondly it defines it has the coefficient of $J_1$ in the computation of $<x^2>$. In the Ripken formalism, these are the same functions.
 
  \begin{code}
 !# normal_form%atot = a_0 o a_1 o a_2 o a_s  for dir=1
@@ -3844,7 +3949,7 @@ a_tracked=as*a0*a1*a2*rot=a_cs*rot
 \end{code}
 
 
-In the above code fragment, which is in \vn{z_track_normal_fact.f90}, there three important steps.  
+In the above code fragment, which is in \href{\tc  z_track_normal_fact.f90}{\vn{z_track_normal_fact.f90}}, there three important steps.  
 
 \begin{enumerate}
 \item At \# 1, the one-turn map is normalized. In FPP, the normalization map is \vn{normal_form%atot}. 
@@ -4540,7 +4645,7 @@ To get around this, PTC has a type \vn{probe}...
 
 
     
-As we said, PTC tracks \vn{probe} or  \vn{probe_8}.  It is very easy to modify the above routines to mimic this feature of PTC. This is done in the module \vn{my_code} in the file \vn{z_my_code.f90}. Notice that the cell is repeated \vn{nlat} times which is defaulted to 4:
+As we said, PTC tracks \vn{probe} or  \vn{probe_8}.  It is very easy to modify the above routines to mimic this feature of PTC. This is done in the module \vn{my_code} in the file \href{\tdemo main_program/z_my_code.f90}{\vn{z_my_code.f90}}. Notice that the cell is repeated \vn{nlat} times which is defaulted to 4:
 
 \begin{code}
   module my_code
