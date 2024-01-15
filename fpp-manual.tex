@@ -5,7 +5,10 @@
 %   pdflatex fpp-manual
 %   pdflatex fpp-manual
 %-----------------------------------------
-
+%
+%home -> web web
+%search FPPmanual
+%right bottom for link address
 %\documentclass{article}
 %
 \documentclass{hitec}     % Tutorial overall style
@@ -73,13 +76,21 @@
 \renewcommand{\l@table}{\@dottedtocline{1}{1.5em}{3.3em}}
 \makeatother
 
-
-\def\ta{http://www.takafumi.org/etienne/new_pages/simple_programs/}
-\def\tb{http://www.takafumi.org/etienne/new_pages/maps/}
-\def\tc{http://www.takafumi.org/etienne/new_pages/programs/}
-\def\td{http://www.takafumi.org/etienne/new_pages/universal_taylor/}
- 
+%\def\ta{http://www.takafumi.org/etienne/new_pages/simple_programs/}
+%\def\tc{http://www.takafumi.org/etienne/new_pages/programs/}
+%\def\tb{http://www.takafumi.org/etienne/new_pages/maps/}
+%\def\td{http://www.takafumi.org/etienne/new_pages/universal_taylor/}
+%\def\te{http://www.takafumi.org/etienne/new_pages/complex_routines/}
 \def\tdemo{http://www.takafumi.org/etienne/new_pages/my_demo_package/}
+
+\def\ta{https://twikinew.ihep.ac.cn/pubfppptc/Web/Simple_programs/}
+\def\tb{https://twikinew.ihep.ac.cn/pubfppptc/Web/Maps/}
+\def\tc{https://twikinew.ihep.ac.cn/pubfppptc/Web/Programs/}
+\def\td{https://twikinew.ihep.ac.cn/pubfppptc/Web/Universal_Taylor/}
+\def\te{https://twikinew.ihep.ac.cn/pubfppptc/Web/Complex_routines/}
+%\def\tdemo{https://twikinew.ihep.ac.cn/pubfppptc/Web/My_demo_package/}
+ 
+
 
 \newcounter{mytable}
 \Alph{mytable}
@@ -102,6 +113,7 @@
  
 \phantomsection
 \pdfbookmark[1]{Cover Page}{Cover Page}
+
 %\maketitle
 
 \cleardoublepage
@@ -120,6 +132,7 @@ The name PTC is commenly used to designate a code written by Etienne Forest with
 \item The manipulation and analysis of Taylor series and Taylor maps.
 \item Modeling of charged particle beams in accelerators using Taylor maps.
 \end{itemize}
+
 The popularity of PTC can be attested to by its use with the Bmad\cite{b:bmad} toolkit for
 accelerator and X-ray simulations as well as its use within the MAD\cite{b:mad} simulation program.
 
@@ -462,7 +475,7 @@ Poisson Bracket
 \end{center}
  }
 
-\subsection{Some useful operators on c_damap and c_vector_field  }\label{s:usefulmap}
+\subsection{Table of useful operators on c_damap and c_vector_field  }\label{s:usefulmap}
 
 
 \setcounter{mytable}{0}
@@ -569,7 +582,7 @@ M=A.*.M, M=M.**.(n)&\end{array} }$
 
  }
 
-\subsection{The type c_universal_taylor }\label{s:cuniversal}
+\subsection{Table on the permanent storage type c_universal_taylor }\label{s:cuniversal}
 
 
 A taylor series produced by TC or a map analysed by FPP depends on the two versions of the TPSA package of Berz. One version deals intrinsically with real Taylor: this is \vn{c_dabnew.f90}. It is the package on which the polymorphs are used and therefore used by the code TC.  A complex taylor does exist but simply made of two real taylors
@@ -603,7 +616,7 @@ The other package, \vn{cc_dabnew.f90} is a version of Berz package which is intr
 \multirow{3}{*}{ \refstepcounter{mytable}\label{t3:1}\themytable}
  & & \\
  & \mbox{\scriptsize Simple operations illustrated via a one-resoance normal form }&
- \href{\td z_uni.f90}{ \mbox{\scriptsize .sub.~.par.~.d.}} \\
+ \href{\td z_uni.f90}{ \mbox{\scriptsize .sub.~~and~~.par.~.d.}} \\
   & & \\
  \hline
 \multirow{3}{*}{ \refstepcounter{mytable}\label{t3:2}\themytable}
@@ -640,6 +653,99 @@ In item  \ref{t3:3}, we substitute a type \vn{c_ray} into a inversal taylor or a
 \renewcommand{\codefont}{\small}
 
 If a \vn{c_ray}  is used with a \vn{c_damap}, the quaternion array will be filled with the resulting quaternion.
+
+
+
+
+\subsection{Table of  important routines related to Normal Forms (Twiss) }\label{s:improu}
+
+\begin{code}
+type c_factored_lie
+integer :: n = 0
+integer :: dir= 0
+type (c_vector_field), pointer :: f(:)=>null()
+end typec_factored_lie
+\end{code}
+
+This type is used in normal forms since the (reverse)-Dragt-Finn representation is natural and this useful. This is not found in the early papers of Hori\cite{hori,horid} or Deprit\cite{deprit}.
+
+\setcounter{mytable}{0}
+{\footnotesize
+\begin{center}
+\begin{tabular}{|l|c|c|}
+\hline
+ & \mbox{\footnotesize   (t,f: c_taylor, M,A: c_damap and F,F': c_vector_field, df :Dragt-Finn )}& Fortran Operator \\ \hline
+\multirow{3}{*}{ \refstepcounter{mytable}\label{t4:1}\themytable}
+ & & \\
+ & \mbox{\scriptsize Factored Lie from a Normal Form }&
+ \href{\te z_factored.f90}{ \mbox{\scriptsize a=exp(normal\%g)}} \\
+  & & \\
+ \hline
+\multirow{3}{*}{ \refstepcounter{mytable}\label{t4:2}\themytable}
+ & & \\
+ & \mbox{\scriptsize Factorization: canonizing and factoring: averages as example }&
+ \href{\te z_complex_routines.f90}{ \mbox{\scriptsize c_full_factorise and c_full_canonise}} \\
+  & & \\
+ \hline
+\multirow{3}{*}{ \refstepcounter{mytable}\label{t4:3}\themytable}
+ & & \\
+ & \mbox{\scriptsize Linear twiss and nonlinear twiss }&
+ \href{\te z_canonise_linear.f90}{ \mbox{\scriptsize  c_fast_canonise }} and \href{\te z_canonise.f90}{ \mbox{\scriptsize c_full_canonise }} \\
+  & & \\
+ \hline
+\multirow{3}{*}{ \refstepcounter{mytable}\label{t4:4}\themytable}
+ & & \\
+ & \mbox{\scriptsize Linear twiss and nonlinear twiss : coasting beam example }&
+ \href{\te z_canonise_jordan.f90}{ \mbox{\scriptsize  c_fast_canonise }} and \href{\te z_canonise_jordan.f90}{ \mbox{\scriptsize c_full_canonise }} \\
+  & & \\
+ \hline
+\end{tabular}
+\end{center}
+ }
+In item \ref{t4:1}, we use the example of a normal form: 
+%
+%]|Expr|[#b @`b___}).# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|: R:!,F,]<c%"C^<cY A)'# b'4""*|:"$^: C_(":",M1}<c%"C^<cY(!(#:!-<|
+%|exp<c!$1^:"q}}}_(!"#Monaco^:#Spin}}<c%"C^<cY(!(':!-<exp<c!$1^|
+%|$^<c$5Q^:"F}_(!No}}'b M:!-<exp<c!$1^$^<c$5Q^:"F}_^2}}}_(&:#Factored|
+%|  :"n,Eg}}: C$^A^:"1_$^: A^:"0_}& b!( b"0 b#8 b$@ b%H b&P!WW}}|
+%|^: A_}:"M$^: A_(":",M1}:! : ;8/<:";bP8eq,Znffact: ;8/=;bP8-;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} {\cal R}&=\underbrace{{{\cal C}}^{-1}\overbrace{\exp\left({q}\right)}\limits_{}^{{\rm S}{\rm p}{\rm i}{\rm n}}\overbrace{\exp\left({{\widehat{F}}^{No}}\right)\cdots\exp\left({{\widehat{F}}^{2}}\right)}\limits_{}^{{\rm F}{\rm a}{\rm c}{\rm t}{\rm o}{\rm r}{\rm e}{\rm d} ~~n\%g}{\cal C}{{\cal A}}_{1}{{\cal A}}_{0}}\limits_{{\cal A}}^{}M{{\cal A}}^{-1} \label{eq:nffact}\end{align}
+where
+%
+%]|Expr|[#b @`b___})/# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|$^<c$5Q^""*|:"F}_^i:!,F,], $^:"F_^i"#Symbol^:#&c0  /7/1:"&c0!* |
+%|: ;8/<:";bP8eq,Zdefnor: ;8/=:!;bP8 : -;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} {\widehat{F}}^{i}&={F}^{i}\cdot \nabla \ \label{eq:defnor} \end{align}
+%
+%
+ ${\cal A}_{0}$ is the transformation to the fixed point and and ${\cal A}_{1}$ is the linear transformation. Notice that the vector fields of the factored product do not contain any quaternion operator. This is because the orbital normalization is done first. The spin transformation is done later and here it is represented by $\exp(q)$.
+
+In item \ref{t4:2}, we simply factorized the map $A$. In the case of of \vn{c_full_factorise}, we have :
+ %
+%]|Expr|[#b @`b___})9# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|""*|:"A,]$^A^0_,Hk,I"#Symbol^:#&c0  .P$^:"&c0!*A^1_,Hk,I:#&c0  .P|
+%|$^:"&c0!*A(",^2}_,Hk,I:! : ;8/<:";bP8eq,Zcfact: ;8/=;bP8-;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} A=
+{A}_{0}(k)\circ {A}_{1}(k)\circ {A}_{>2}(k) \label{eq:cfact}\end{align}
+where $k$ are the parameters and the index is the orbital order.  
+If we use \vn{c_full_factorise}, then we have 
+%
+%]|Expr|[#b @`b___})># b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|""*|:"A,]$^A^0_,Hk,I"#Symbol^:#&c0  .P$^:"&c0!*A^1_,Hk,I:#&c0  .P|
+%|$^:"&c0!*A(",^2}_,Hk,I:#&c0  .Pr:"&c0!*,Hk,I:! : ;8/<:";bP8eq|
+%|,Zfullc: ;8/=;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} A=
+{A}_{0}(k)\circ {A}_{1}(k)\circ {A}_{>2}(k)\circ \rho (k) \label{eq:fullc}\end{align}
+%
+In \Eq{eq:fullc}, the ${A}_{0}(k)\circ {A}_{1}(k)\circ {A}_{>2}(k)$ as a special form. In particular, ${A}_{1}(k)$ has a Courant-Snyder-Teng-Edwards form: $A_{12}=A_{34}\ldots =0$.  The map $\rho (k)$ is 
+a (nonlinear) rotation in the symplectic case.
+
+
+In item \ref{t4:3}, we use the canonization routines to compute (nonlinear) phase advances. In the linear case, damping is also included. In item \ref{t4:4}, the same routines are used for the coasting beam example. In that case, in BMAD, the sixth variable is a constant. The normalization is a Jordan\footnote{Strictly speaking it is not, but it could be at the expense of making a non-symplectic transformation which is a stupid thing to do.} normal form in the linear case and, in the nonlinear case, an extension where the time variable depends only on the sixth variable (the  invariant energy) and the transverse actions. Turning on damping, in this case, is unphysical.
 
 
 %-------------------------------------------------------------------
@@ -943,7 +1049,7 @@ This is exactly \Eq{eq:nodnvpm}.  We encourage the reader to compile the files a
 
 \section{DA and TPSA maps}\label{s:datpsamaps}
 
-The code for this section is located at \href{\tc z_track_da_tpsa.f90}{\vn{z_track_da_tpsa.f90}}.
+The code for this section is located at \href{\tb z_track_da_tpsa.f90}{\vn{z_track_da_tpsa.f90}}.
 
 A code like TC always produces TPSA objects by default. To make the explanations simple, we will assume here  that TC is tracking for one turn in a ring. The closed orbit in that case is a natural special orbit demanded by theory. For example, all textbooks assume some version of Hill's equation {\bf around the  ideal closed orbit} when discussing Courant-Snyder theory.
 
