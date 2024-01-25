@@ -87,7 +87,7 @@
 \def\tb{https://twikinew.ihep.ac.cn/pubfppptc/Web/Maps/}
 \def\tc{https://twikinew.ihep.ac.cn/pubfppptc/Web/Programs/}
 \def\td{https://twikinew.ihep.ac.cn/pubfppptc/Web/Universal_Taylor/}
-\def\te{https://twikinew.ihep.ac.cn/pubfppptc/Web/Complex_routines/}
+\def\te{https://twikinew.ihep.ac.cn/pubfppptc/Web/Complex_Routines/}
 %\def\tdemo{https://twikinew.ihep.ac.cn/pubfppptc/Web/My_demo_package/}
  
 
@@ -669,6 +669,8 @@ end typec_factored_lie
 
 This type is used in normal forms since the (reverse)-Dragt-Finn representation is natural and this useful. This is not found in the early papers of Hori\cite{hori,horid} or Deprit\cite{deprit}.
 
+
+
 \setcounter{mytable}{0}
 {\footnotesize
 \begin{center}
@@ -684,7 +686,7 @@ This type is used in normal forms since the (reverse)-Dragt-Finn representation 
 \multirow{3}{*}{ \refstepcounter{mytable}\label{t4:2}\themytable}
  & & \\
  & \mbox{\scriptsize Factorization: canonizing and factoring: averages as example }&
- \href{\te z_complex_routines.f90}{ \mbox{\scriptsize c_full_factorise and c_full_canonise}} \\
+ \href{\te z_complex_routines.f90}{ \mbox{\scriptsize c_full_factorise }}and \href{\te z_complex_routines.f90}{ \mbox{\scriptsize  c_full_canonise}} \\
   & & \\
  \hline
 \multirow{3}{*}{ \refstepcounter{mytable}\label{t4:3}\themytable}
@@ -696,12 +698,21 @@ This type is used in normal forms since the (reverse)-Dragt-Finn representation 
 \multirow{3}{*}{ \refstepcounter{mytable}\label{t4:4}\themytable}
  & & \\
  & \mbox{\scriptsize Linear twiss and nonlinear twiss : coasting beam example }&
- \href{\te z_canonise_jordan.f90}{ \mbox{\scriptsize  c_fast_canonise }} and \href{\te z_canonise_jordan.f90}{ \mbox{\scriptsize c_full_canonise }} \\
+ \href{\te z_canonise_jordan.f90}{ \mbox{\scriptsize  c_fast_canonise }} and \href{\te z_canonise_jordan.f90}{ \mbox{\scriptsize c_canonise/c_full_canonise }} \\
+  & & \\
+ \hline
+\multirow{3}{*}{ \refstepcounter{mytable}\label{t4:5}\themytable}
+ & & \\
+ & \mbox{\scriptsize Teng-Edwards via de Moivre }&
+ \href{\te z_canonise_jordan_teng_edwards.f90}{ \mbox{\scriptsize  call teng_edwards_a1(a1,R,C,COSLIKE,t_e) }} \\
   & & \\
  \hline
 \end{tabular}
 \end{center}
  }
+
+ 
+
 In item \ref{t4:1}, we use the example of a normal form: 
 %
 %]|Expr|[#b @`b___}).# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
@@ -746,6 +757,80 @@ a (nonlinear) rotation in the symplectic case.
 
 
 In item \ref{t4:3}, we use the canonization routines to compute (nonlinear) phase advances. In the linear case, damping is also included. In item \ref{t4:4}, the same routines are used for the coasting beam example. In that case, in BMAD, the sixth variable is a constant. The normalization is a Jordan\footnote{Strictly speaking it is not, but it could be at the expense of making a non-symplectic transformation which is a stupid thing to do.} normal form in the linear case and, in the nonlinear case, an extension where the time variable depends only on the sixth variable (the  invariant energy) and the transverse actions. Turning on damping, in this case, is unphysical.
+
+Symplectic stable matrices can be represented using a de Moivre representation where the matrices $H^i$ and $B^i$ form 3 independent representations of the complex numbers: $ (B^i)^2=-H^i$:
+%
+%]|Expr|[#b @`b___})-# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|$^""*|:"T_^N"#Symbol^:# :!,F:",]<c%#D^<c!(A))# b'4:!-<cos<c!$1|
+%|(":"N$^:#&c0  m^:"&c0!*i_}}$^H_^i,K:!-<sin<c!$1(":"N$^:#&c0  m|
+%|^:"&c0!*i_}}$^B_^i}& b!( b"0 b#8 b$@ b%H b&P!WW}}(":!-<sum}^:"i|
+%|_} : ;8/<:";bP8dmbn: ;8/=:!;bP8 : -;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} {T}^{N} &=
+\sum\limits_{i}^{} \left\{{\cos\left({N{\mu }_{i}}\right){H}^{i}+\sin\left({N{\mu }_{i}}\right){B}^{i}}\right\}\ \label{dmbn} \end{align}
+
+
+
+Item \ref{t4:5} refers to the Teng-Edwards factorization. The 4 by 4 matrix which diagonalizes the one-turn matrix in 2-d-f can be factorized as:
+
+%
+%]|Expr|[#b @`b___})b Q# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|""Monaco^:"If "#*|:#M,]BR$^B_(",M1}  :!,F"$Symbol^:$&c0  .N:#&c0!* |
+%| B,]VA:"   where   :#V,]<c!$1^["" (":$&c0  g:#&c0!*I}^C(",M$^|
+%|C_^,K}(":$&c0  g:#&c0!*I}}}:! : ;8/<:#;bP8eq,Ztefac: ;8/=:# :$;bP8 |
+%|:!-<-<:$ :" where :!,F"%Times|:%A:" is block diagonal: -;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} {\rm I}{\rm f}~M=
+BR{B}^{-1}\ \ &\rightarrow \ \ B=
+VA~~~{\rm w}{\rm h}{\rm e}{\rm r}{\rm e}~~~V=
+\left({\begin{array}{cc}\gamma I&C\\
+-{C}^{+}&\gamma I\end{array}}\right) \label{eq:tefac}\  \\ ~{\rm w}{\rm h}{\rm e}{\rm r}{\rm e}~&A~{\rm i}{\rm s}~{\rm b}{\rm l}{\rm o}{\rm c}{\rm k}~{\rm d} {\rm i}{\rm a}{\rm g}{\rm o}{\rm n}{\rm a}{\rm l}\end{align}
+
+For example, $H^1$ and  $H^2$ can be expressed in terms of the Teng-Edwards matrices and vice versa.
+
+%
+%]|Expr|[#b @`b___})4# b'4" Chicago^: ;bP8&c0!*,^$^"!*|:!H_^1,]|
+%|<c!$1^["" ("$^""Symbol^:"&c0  g_^:!&c0!*2I}(#,M:"&c0  g:!&c0!*C}|
+%|(",M$(":"&c0  g:!&c0!*C}_^,K}("<c!$1(#1,M$^:"&c0  g_^:!&c0!*2}}|
+%|I}}}"#Monaco^:#   and   $^:!H_^2,]<c!$1^["" ("<c!$1(#1,M$^:"&c0  g|
+%|_^:!&c0!*2}}I}(":"&c0  g:!&c0!*C}^$(":"&c0  g:!&c0!*C}_^,K("$|
+%|^:"&c0  g_^:!&c0!*2I}}}: ;8/<:!;bP8eq,Zhmat: ;8/=;bP8,\|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{eqnarray}{H}^{1}=
+\left({\begin{array}{cc}{\gamma }^{2}I&-\gamma C\\
+-{\gamma C}^{+}&\left({1-{\gamma }^{2}}\right)I\end{array}}\right)~~~{\rm a}{\rm n}{\rm d} ~~~{H}^{2}=
+\left({\begin{array}{cc}\left({1-{\gamma }^{2}}\right)I&\gamma C\\
+{\gamma C}^{+}&{\gamma }^{2}I\end{array}}\right)\label{eq:hmat}\end{eqnarray}
+%
+
+In \Eq{eq:tefac}, the matrix $V$  has a divergence for large coupling.  This happens eventhough  the one-turn matrix $M$ is well behaved. The constant $\gamma $ goes to zero while the 2 by 2 matrix goes to infinity. Also ${\gamma }^2 <0 $ is not a problem for $H^1$. In any event, the computation of the Teng-Edwards matrices, with parameter depedence, is explained in item \ref{t4:5}.
+
+\subsection{ Symplectific restauration and symplectification}
+\label{s:symf}
+
+In reference \cite{forestreview}, Forest distinguishes two processes. One process he dubs ``symplectic restauration'' and the other one is the more traditional ``symplectification''.
+
+Symplectic restauration is not about tracking. It is a process which only involves the  truncated map, i.e., the jet algebra $\prescript{}{no}{D}_{nv}$ described in (\sref{s:tpsadef}). Usually a Taylor map, truncated at order $no$ is not symplectic simply because the Taylor series is truncated. However it is also possible that the Taylor series at order $\le no$ is  incompatible with a symplectic map. This can happen if the integrator used to extract the Taylor coefficients was not symplectic.
+
+Finally, given a proper Taylor series, we may want to add an ``infinite'' number of monomials to make it symplectic to machine precision during tracking. This is extremely useful if a map is used for tracking. If the map contains radiation, the non-symplectic effects due to numerics can easily overcome the physical effects due to radiation and care must be taken.
+
+
+
+\setcounter{mytable}{0}
+{\footnotesize
+\begin{center}
+\begin{tabular}{|l|c|c|}
+\hline
+ & \mbox{\footnotesize   (t,c_taylor, f: M,A: c_damap and F,F': c_vector_field  )}& Fortran Operator \\ \hline
+\multirow{3}{*}{ \refstepcounter{mytable}\label{t5:1}\themytable}
+ & & \\
+ & \mbox{\scriptsize Symplectic restaurant }&
+ \href{\te z_symplectify.f90}{ \mbox{\scriptsize symplectify_general(M,L_r , N_r , L_s, N_s,Q_s )}} \\
+  & & \\
+ \hline
+\end{tabular}
+\end{center}
+
+ }
 
 
 %-------------------------------------------------------------------
