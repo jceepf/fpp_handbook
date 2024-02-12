@@ -88,6 +88,7 @@
 \def\tc{https://twikinew.ihep.ac.cn/pubfppptc/Web/Programs/}
 \def\td{https://twikinew.ihep.ac.cn/pubfppptc/Web/Universal_Taylor/}
 \def\te{https://twikinew.ihep.ac.cn/pubfppptc/Web/Complex_Routines/}
+\def\tf{https://twikinew.ihep.ac.cn/pubfppptc/Web/Linear/}
 %\def\tdemo{https://twikinew.ihep.ac.cn/pubfppptc/Web/My_demo_package/}
  
 
@@ -262,7 +263,7 @@ The library
 \end{code}
 can actually be used separately. It allows for   tracking using Taylor maps: remember that PTC proper (TC) does not use Taylor maps for tracking, it is a ``kick code'' or integrator.}
 %--------------------------------------------------------------------------------------------------------
-\Section{Concepts: Taylor series, polymorphs and Taylor maps}
+\Section{Concepts: why we need TPSA?}
 \label{s:concepts}
 
 The purpose of this section is to explain why we would like to write an integrator equipped with polymorphism. Of course the purpose exists before the code and, for the most part, is not the result of ``Darwinian evolution''. 
@@ -323,6 +324,10 @@ xyz = 3.4_dp * abc / 1e9_dp   ! 3.4_dp and 1e9_dp are double precision.
 \end{code}
 
 In this manual, \vn{real(dp)} is often written as \vn{real(8)} in case the meaning of \vn{dp} is forgotten. However \vn{dp} could be \vn{16} if quadruple precision is used.
+
+\Section{Tables with examples}
+\label{s:tables}
+
 
 \subsection{Some useful operators on Taylor series}\label{s:useful}
 
@@ -582,6 +587,10 @@ M=A.*.M, M=M.**.(n)&\end{array} }$
 
  }
 
+
+
+
+
 \subsection{Table on the permanent storage type c_universal_taylor }\label{s:cuniversal}
 
 
@@ -820,21 +829,105 @@ Finally, given a proper Taylor series, we may want to add an ``infinite'' number
 \begin{center}
 \begin{tabular}{|l|c|c|}
 \hline
- & \mbox{\footnotesize   (t,c_taylor, f: M,A: c_damap and F,F': c_vector_field  )}& Fortran Operator \\ \hline
+ & \mbox{\footnotesize   (t:c_taylor, M,A: c_damap and F,F': c_vector_field  )}& Fortran Routines \\ \hline
 \multirow{3}{*}{ \refstepcounter{mytable}\label{t5:1}\themytable}
  & & \\
- & \mbox{\scriptsize Symplectic restaurant }&
+ & \mbox{\scriptsize Symplectic restauration and symplectification }&
  \href{\te z_symplectify.f90}{ \mbox{\scriptsize symplectify_general(M,L_r , N_r , L_s, N_s,Q_s )}} \\
+  & & \\
+ \hline
+\multirow{3}{*}{ \refstepcounter{mytable}\label{t5:2}\themytable}
+ & & \\
+ & \mbox{\scriptsize Symplectic restauration and symplectification }&
+ \href{\te z_symplectify_tracking.f90}{ \mbox{\scriptsize fill_tree_element_line_zhe_outside_map }} \\
+  & & \\
+ \hline
+\multirow{3}{*}{ \refstepcounter{mytable}\label{t5:3}\themytable}
+ & & \\
+ & \mbox{\scriptsize Check symplectic or orthogonal condition }&
+ \href{\te z_symplectify.f90}{ \mbox{\scriptsize  call checksymp(M,normt,orthogonal=.false.)}} \\
   & & \\
  \hline
 \end{tabular}
 \end{center}
-
  }
 
 
+
+
+
+The map $M$, midly in item \ref{t5:1} is factorized as
+%
+%]|Expr|[#b @`b___})4# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|""*|:"M:!,F,]$^:"L^r_"#Symbol^:#&c0  .P$^:"&c0!*N^r_:#&c0  .P|
+%|$^:"&c0!*L^s_:#&c0  .P$^:"&c0!*N^s_:#&c0  .P$^:"&c0!*Q^s_:! : ;8/<|
+%|:";bP8eq,Zsympf: ;8/=;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} M&={L}_{r}\circ {N}_{r}\circ {L}_{s}\circ {N}_{s}\circ {Q}_{s} \label{eq:sympf}\end{align}
+%
+where $L_s$ is a symplectic matrix and $N_s$ is a symplectic jet near the identity. $L_r$ is a linear nonsymplectic matrix and $N_r$ is near the identity and non-symplectic.
+
+$L_s$ is computed from the linear part of $M$ using a contraction map due to Furman. $L_s$ is computed via a procedure using an  integral of a vector field . These are    described in \cite{forestreview} sections 2, 3 and 4.
+
+In item \ref{t5:2} we show a routine which factorizes a map into a radiative part and symplectic is a variable called \vn{sagan_gen} is false. This follows pretty much the factorization explained in \Eq{eq:sympf}.
+
+If \vn{sagan_gen} is true, then the nonlinear map is described by a partially inverted map whose implicit solution is symplectic if there is no radiation, otherwise it contains radiation. This is the prefered method.
+
+In item \ref{t5:3}, we can check the symplectic condition of a linear map, i.e., the matrix part of $M$. 
+\vn{normt} is closed to zero if the map is orthogonal or symplectic.
+
+For a nonlinear map, the symplectic condition can be checked by looking at ${L}_{r}\circ {N}_{r}$ in \Eq{eq:sympf}.
+
+
+\subsection{Linear matrices and type  \vn{c_linear_map} }
+\label{s:linstuff}
+
+Matrices can be extracted  and linear vector fields as well.  They can also be exponentiated.
+
+More importantly there is also a type \vn{c_linear_map} which can be used for linear twiss with spin. The invariant of the linear map (Ripken style) as well as the invariant spin field can be computed.
+
+
+\setcounter{mytable}{0}
+{\footnotesize
+\begin{center}
+\begin{tabular}{|l|c|c|}
+\hline
+ & \mbox{\footnotesize   (mat(:,:), M,A: c_damap and F,F': c_vector_field  )}& Fortran Routines \\ \hline
+\multirow{3}{*}{ \refstepcounter{mytable}\label{t6:1}\themytable}
+ & & \\
+ & \mbox{\scriptsize Matrices and \vn{c_damap}}&
+ \href{\tf z_exp.f90}{ \mbox{\scriptsize  Mat(n,n) = M where n=nd2+np  : Mat  is complex(8) or real(8)}} \\
+  & & \\
+ \hline
+\multirow{3}{*}{ \refstepcounter{mytable}\label{t6:2}\themytable}
+ & & \\
+ & \mbox{\scriptsize Matrices and \vn{c_vector_field } }&
+ \href{\tf z_exp.f90}{ \mbox{\scriptsize H(:,:)=F }} \\
+  & & \\
+ \hline
+\multirow{3}{*}{ \refstepcounter{mytable}\label{t6:3}\themytable}
+ & & \\
+ & \mbox{\scriptsize Exponentiation of matrices}&
+ \href{\tf z_exp.f90}{ \mbox{\scriptsize   call exp(H(:,:),M(:,:)) ~~~ means ~~~M=exp(H))
+}} \\
+  & & \\
+ \hline
+\multirow{3}{*}{ \refstepcounter{mytable}\label{t6:4}\themytable}
+ & & \\
+ & \mbox{\scriptsize Phase advance with \vn{c_linear_map}}&
+ \href{\tf z_canonise_jordan_linear.f90}{ \mbox{\scriptsize   c_fast_canonise  and  compute_lattice_functions 
+}} \\
+  & & \\
+ \hline
+\end{tabular}
+\end{center}
+ }
+
+
+Very often we want to do linear calculations of the so-called Twiss type. These calculations in general can compute all orbital lattice functions (as defined by Ripken-Nishikawa-Wolski) and also include the triad of spin vectors $(l,n,m)$.  Also, we may compute phase advances as well as phase slip and damping ``advances.''
+
+
 %-------------------------------------------------------------------
-\subsection{TPSA Versus DA}
+\section{TPSA Algebra}
 \label{s:tpsa}
 
 TPSA stands for ``Truncated Power Series Algebra'' and DA stands for ``Differential Algebra.''
@@ -1382,7 +1475,7 @@ ${M}_{{w}_{0}}\circ {N}_{{z}_{0}}$. This is why, in FPP, the DA concatenation do
 
 This DA operation is done in FPP between two \vn{c_damap}'s using the operator \vn{*}.
 
-\subsubsection{Where are  TPSA map and DA stored: one two Fortran type but two operations}\label{s:storage}
+\subsubsection{Where are  TPSA map and DA stored: one  Fortran type but two operations}\label{s:storage}
 
 A code like TC naturally produces TPSA maps of the form
 %
