@@ -115,7 +115,7 @@
 \phantomsection
 \pdfbookmark[1]{Cover Page}{Cover Page}
 
-%\maketitle
+\maketitle
 
 \cleardoublepage
 \phantomsection
@@ -2932,6 +2932,292 @@ TPSA  closed orbit  0.4576E-02 -0.8650E-05 -0.1701E-04 -0.4623E-04
  We see that the situation as improved and approaches the DA result.     It is not surprising that users of COSY-INFINITY must run at very higher order in rings. This is not necessary with a symplectic integrator provided all the maps are around the closed orbit, i.e., DA maps.
 %--------------------------------------------------------------------------------------------------------
 %--------------------------------------------------------------------------------------------------------
+\Section{Skeletal description of \vn{c_normal_new}: normal form routine}
+\label{s:cnormal}
+
+This routine  \vn{c_normal_new}, normally, is used with a DA map presumably computed around the closed orbit of a tracking code.  It is made of 3 essential parts and some incidental parts:
+
+\begin{enumerate}
+\item Go to the parameter dependent fix point 
+\item Normalizing exactly the linear map using complex eigenvectors  and the constant quaternion.
+\item Normalizing the nonlinear map spin included
+\end{enumerate}
+
+{\bf N.B. In the presence of radiation, the tune shifts are left in. They act like a resonance for the damping. This is controlled by a global variable called \vn{remove_tune_shift} which is set to false by default. See reference \cite{thenewbook}, section 5.5 for an example.}
+
+
+\subsection{New formulae: changing a vector field and the  Lie bracket}\label{s:liebrav}
+
+A vector field operates on a quaterion as follows:
+
+%
+%]|Expr|[#b @`b___})3# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|<c$5Q^""Times|:"F}q,]<c$%!^"#*|:#F}"$Symbol^:$&c0  /7<c$%!^/1}|
+%|:#&c0!*q ,Kqf:!  : ;8/<:#;bP8hopq0: ;8/=;bP8-;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} \widehat{F}q=
+\vec{F}\cdot \vec{\nabla }q\ +qf  \label{hopq0}\end{align}
+
+
+Consider the Lie map $\cal A$ operator associated with the phase space map $A=(a,\alpha)$. It acts on a phase space map $M=(m,q)$  following, the formula:    %, per \Eq{eq:conq}
+%
+%]|Expr|[#b @`b___})0# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|: A<c!$1(#""*|:"m,Lq}}:!,F,]<c!$1(#m:",Lq}}"#Symbol^:#&c0  .P|
+%|<c!$1(#:"&c0!*a,L:#&c0  a}}:"&c0!*,]<c!$1(&:!m:#&c0  .P:"&c0!*a|
+%|,L<c!(A(#q:#&c0  .P:"&c0!*a}}:#&c0  a}}: ;8&c0!*/<:";bP8eq,Zkoopman|
+%|: ;8/=;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} {\cal A}\left({m,q}\right)&=\left({m,q}\right)\circ \left({a,\alpha }\right)=
+\left({m\circ a,\left\{{q\circ a}\right\}\alpha }\right)\label{eq:koopman}\end{align}
+%
+How does a vector field $\widehat{F}$  transform by the map of \Eq{eq:koopman}? This has to be done by a similarity transformation:
+%
+%]|Expr|[#b @`b___})6# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|""*|:" : A<c!$1()"#Times|:#F"$Symbol^:$&c0  /7/1:"&c0!*,K:!-<|
+%|hat-[:"f:!-]}}$^: A_(":!,M1},F,]:" <c$4Q^F}:$&c0  /7/1:"&c0!*,K|
+%|:!-<hat-[<c$4Q^:"f}:!-] : ;8/<:";bP8aacts: ;8/=;bP8-;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} \ {\cal A}\left({F\cdot \nabla +\hat{f}}\right){{\cal A}}^{-1}&=\ \widetilde{F}\cdot \nabla +\hat{\widetilde{f}} \label{aacts}\end{align}
+%
+The answer for $\widetilde{F}$ and  $\widetilde{f}$ is:
+%
+%]|Expr|[#b @`b___})=# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|$^<c$4Q^""*|:"F}^k_:!,F,]<c!$1(#$^:"F^i_$^"#Symbol^:#&c0  .V^|
+%|:"&c0!*i_$^a^k(",M1}}}:#&c0  .P:"&c0!*a: ;bP;/":!;bP8 :" <c$4Q|
+%|^:!f} ,F,]<c!$1(#$^<c$4Q^:"F}^k_$^:#&c0  .V^:"&c0!*k_$^:#&c0  a|
+%|_(":"&c0!*,M1}}}:#&c0  a:"&c0!*,K$^:#&c0  a_(":"&c0!*,M1}f:#&c0  .P|
+%|:"&c0!*a :#&c0  a:!&c0!* : ;8/<:";bP8eq,Ztransfgrag: ;8/=;bP8-;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} {\widetilde{F}}_{k}&=\left({{F}_{i}{\partial }_{i}{a}_{k}^{-1}}\right)\circ a\nonumber \\
+ \ \widetilde{f} &=\left({{\widetilde{F}}_{k}{\partial }_{k}{\alpha }^{-1}}\right)\alpha +{\alpha }^{-1}f\circ a\ \alpha  \label{eq:transfgrag}\end{align}
+
+
+As for the Lie bracket, we first evaluate the commutator of two  operators $\widehat{F}$ and  $\widehat{H}$:
+%
+%]|Expr|[#b @`b___})6# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|<c!=Q(#<c$5Q^""Times|:"F},L<c$5Q^H}}}:!,F,]<c!=Q(5"#*|:#F"$Symbol^:$&c0  /7|
+%|/1:#&c0!*,K:!-<hat-[:#f:!-] ,L:#H:$&c0  /7/1:#&c0!*,K:!-<hat-[|
+%|h-] }}: ;bP;/":!;bP8 ,F,], :#G:$&c0  /7/1:#&c0!*,K:!-<hat-[:#g|
+%|:!-] : ;8/<:#;bP8hopc: ;8/=;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} \left[{\widehat{F},\widehat{H}}\right]&=\left[{F\cdot \nabla +\hat{f} ,H\cdot \nabla +\hat{h} }\right]\nonumber \\
+ &=G\cdot \nabla +\hat{g} \label{hopc}\end{align}
+ 
+The answer for $\widehat{G}$ is: 
+%
+%]|Expr|[#b @`b___})b D# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|""*|:"G:!,F,] <c!,Q(#"#Times|:#F,LH}},]F"$Symbol^:$&c0  /7/1:"&c0!*H|
+%|,MH:$&c0  /7/1:"&c0!*F: ;bP;/":!;bP8 g,F,]<c!=Q(#:#h,Lf}},KF:$&c0  /7|
+%|/1:"&c0!*h,MG:$&c0  /7/1:"&c0!*f:! : ;8/<:!;bP8liebra: ;8/=;bP8-;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} G&= \left\langle{F,H}\right\rangle=
+F\cdot \nabla H-H\cdot \nabla F\nonumber \\
+ g&=\left[{h,f}\right]+F\cdot \nabla h-G\cdot \nabla f \label{liebra}\end{align}
+Where the orbital part of the Lie bracket is defined by
+%
+%]|Expr|[#b @`b___})0# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|<c!,Q(#""*|:"F,LG}},]$^F^b_<2(""#Symbol^:#&c0  .V:"&c0!*G}(":#&c0  .V|
+%|$^:"&c0!*z^b_}},M$^G^b_<2(":#&c0  .V:"&c0!*F}(":#&c0  .V$^:"&c0!*z|
+%|^b_}}:! : ;8/<:";bP8eq,Zliebrac: ;8/=;bP8-;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} \left\langle{F,G}\right\rangle=
+{F}_{b}{\partial G \over \partial {z}_{b}}-{G}_{b}{\partial F \over \partial {z}_{b}} \label{eq:liebrac}\end{align}
+
+%
+\subsection{Going to the fixed point: transformation   $A_0$}\label{s:cgofix}
+
+This routines is called at position !\#1 in \vn{Ci_tpsa.f90}.
+
+
+This routine is only ``complicated'' if the 3rd plane is coasting (energy $z_6$ is constant).  In that case, $z_6$ is added to the list of parameters. 
+%
+%]|Expr|[#b @`b___})-# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|<c%#D(%$^""*|:"N(!ij}_$^f^j_,K$^"#Symbol^:#&c0  D^:"&c0!*k_$^|
+%|v(!kj}_}(":!-<sum}(,:"1,L4,L k,]6,L1,Znp}_},]$^f^i_  : ;8/<:";bP8etaform|
+%|1: ;8/=:!;bP8 : -;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} \sum\limits_{1,4,\ k=
+6,1:np}^{} {N}_{ij}{f}_{j}+{\Delta }_{k}{v}_{kj}=
+{f}_{i}\ \ \label{etaform1} \end{align}
+
+The array $\Delta$ contains $z_6$ and \vn{np} system parameters. The fixed point $f$ is computed via a DA inversion. This is done at location !\#\#3 in the code.
+
+The presence of $z_6$ implies a modification of the time of flight if the canonical transformation is to be symplectic.  Therefore the following Lie map is contructed:
+%
+%]|Expr|[#b @`b___})*# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|$^: A^""*|:"0_:!,F,]-<exp<c!$1(#:",Z<c%#D(#$^f^i_$^S(!ij}_$^z|
+%|^j_}(":!-<sum}('i,Lj,]1,L4}_}:",Z}}: ;8/<:";bP8tlie: ;8/=;bP8-;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} {{\cal A}}_{0}&=\exp\left({:\sum\limits_{i,j=1,4}^{} {f}_{i}{S}_{ij}{z}_{j}:}\right)\label{tlie}\end{align}
+
+The change in the time variable $z_5$ is done using:
+%
+%]|Expr|[#b @`b___})-# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|$^""*|:"z^5(!new}:!,F,], $^z^5_,M<c%#D(#<2(""#Symbol^:#&c0  .V|
+%|$^:"&c0!*f^i_}(":#&c0  .V$^:"&c0!*z^6_}}$^S(!ij}_$^x^j_}(":!-<|
+%|sum}('i,Lj,]1,L4}_}: ;8/<:";bP8tlie5: ;8/=;bP8-;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} {z}_{5}^{new}&={z}_{5}-\sum\limits_{i,j=1,4}^{} {\partial {f}_{i} \over \partial {z}_{6}}{S}_{ij}{x}_{j}\label{tlie5}\end{align}
+%
+This is done after line !\#\#5 in the code using a \vn{c_universal_taylor} called \vn{uf1}, this is needed in Berz's package.
+\vskip 0.5cm
+{N.B. \bf This calculation must be done to order 1 at least in a standard normal form.}
+
+
+\subsection{Linear   normal form: $A_1$ }\label{s:lineara}
+
+\subsubsection{Linear orbital map in normal form: \vn{c_linear_a(m1,a1)}}\label{s:linearorb}
+
+This transformation, at line !\#2, requires access to a package capable of finding the complex eigenvectors and eigenvalues.
+Parameters are not (never) included in this stage: they are always handled by the nonlinear part of the normal form.
+
+In FPP,  this is done via a routine by Filipo Neri. It is located at !\#\#\#1. Prior to this, the coasting plane, if it exists, is relegated to the last plane. This is necessary if some magnets are modulated via an harmonic oscillation and thus part of the normal form.  
+
+The rest of the routine, !\#\#\#4 ,  insures that the Poisson bracket is 1 between planes. If the original map is symplectic, this is enough to insure that the linear transformation is symplectic. For nonsymplectic maps, this does not hurt.
+
+The theory behind this is described in section (2.4.1) of the yellow book\cite{thebook}.
+
+\subsubsection{Linear spin  normal form: }\label{s:linearspin}
+
+Assuming the spin part of the one-turn map has the form:
+%
+%]|Expr|[#b @`b___})3# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|""*|:"q,]:!-<cos<c!$1^<2^"#Symbol^:#&c0  q^:"&c0!*2}},K:!-<sin|
+%|<c!$1^<2^:#&c0  q^:"&c0!*2}}<c!$1(($^:#&c0  w^:"&c0!*1_i,K$^:#&c0  w|
+%|^:"&c0!*2_j,K$^:#&c0  w^:"&c0!*3_k}}:! : ;8/<:";bP8eq,Zquatmap|
+%|: ;8/=;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} q=
+\cos\left({{\theta  \over 2}}\right)+\sin\left({{\theta  \over 2}}\right)\left({{\omega }_{1}i+{\omega }_{2}j+{\omega }_{3}k}\right) \label{eq:quatmap}\end{align}
+then we can diagonalize it:
+%
+%]|Expr|[#b @`b___})3# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|$^q^r_""*|:",]:!-<cos<c!$1^<2^"#Symbol^:#&c0  q^:"&c0!*2}},K:!-<|
+%|sin<c!$1^<2^:#&c0  q^:"&c0!*2}}j:! : ;8/<:";bP8eq,Zquatmapj: ;8/=|
+%|;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} {q}_{r}=
+\cos\left({{\theta  \over 2}}\right)+\sin\left({{\theta  \over 2}}\right)j \label{eq:quatmapj}\end{align}
+using the following transformation
+%
+%]|Expr|[#b @`b___})3# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|""*|:"a,]:!-<cos<c!$1^"#Symbol^:#&c0  a}:"&c0!*,K:!-<sin<c!$1|
+%|^:#&c0  a}<c!$1(%$^a^:"&c0!*1_i,K$^:#&c0  a^:"&c0!*3_k}}:! : ;8/<|
+%|:";bP8eq,Zquas: ;8/=;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} a=
+\cos\left({\alpha }\right)+\sin\left({\alpha }\right)\left({{\alpha }_{1}i+{\alpha }_{3}k}\right) \label{eq:quas}\end{align}
+In other words we have:
+%
+%]|Expr|[#b @`b___})*# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|""*|:"q,]a$^:!q^r_$^a_(",M1}:":! : -;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} q=
+a{q}_{r}{a}^{-1} \end{align}
+
+This calculation is performed in \vn{c_normal_spin_linear_quaternion(m1,m1,n%AS,alpha)}.
+
+In FPP, as displayed in \Eq{eq:quatmapj}, the normal axis of the normal form is $j$, i.e., the vertical axis. This makes sense to the extent that most rings are planar.
+
+
+
+
+\subsection{The nonlinear algorithm}\label{s:nonlinearnorm}
+
+This is usually the most scary thing for neophytes. In reality, the nonlinear algorithm is a turn-the-crank algorithm that monotonically repeats itself order by order until the map is in normal form. It is easiest to describe in terms of Lie operators, i.e., vector fields.  The type \vn{c_vector_field} is made of an orbital operator and a quaternion. 
+
+%
+%]|Expr|[#b @`b___})0# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|<c$5Q^""Times|:"F},]<c$%!^"#*|:#F}"$Symbol^:$&c0  /7<c$%!^/1}|
+%|:#&c0!* ,K<c$5Q^f}:!  : ;8/<:#;bP8hop: ;8/=;bP8-;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} \widehat{F}=
+\vec{F}\cdot \vec{\nabla }\ +\widehat{f}  \label{eq:hop}\end{align}
+
+It operates on a quaternion $q$ as follows:
+%
+%]|Expr|[#b @`b___})2# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|<c$5Q^""Times|:"F}q,]<c$%!^"#*|:#F}"$Symbol^:$&c0  /7<c$%!^/1}|
+%|:#&c0!*q ,Kqf:!  : ;8/<:#;bP8hopq: ;8/=;bP8-;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} \widehat{F}q=
+\vec{F}\cdot \vec{\nabla }q\ +qf  \label{hopq}\end{align}
+The reverse order on the quaternion is necessary for consistancy with the orbital Lie operator.
+
+At line !\#3, the orbital dependence is transformed into phasors. This is important to identify the resonances from the tune shifts. At line !\#10, a similar thing is done for the quaternion: we go into ``eigenquaternions'' under rotation around the $y$-axis. This is done inside the normalization loop.
+
+In the normalization, the Lie map version of the map, always looks as follows:
+%
+%]|Expr|[#b @`b___})1# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|$^: M^""*|:"i_:!,F,]: R:!-<exp<c!$1^$^<c$5Q^:"K}^1_}'b M:!-<exp|
+%|<c!$1^$^<c$5Q^:"K}(#i,M1}_}:!-<exp<c!$1^$^<c$5Q^:"F}^i_}:! : -;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} {{\cal M}}_{i}&={\cal R}\exp\left({{\widehat{K}}_{1}}\right)\cdots\exp\left({{\widehat{K}}_{i-1}}\right)\exp\left({{\widehat{F}}_{i}}\right) \end{align}
+%
+Here ${{\widehat{F}}_{i}}$ contains terms which ought to be removed. The normalization iteration ends when ${{\widehat{F}}_{i}}=0$  and ${{\widehat{K}}_{i}}$ contains only tune shifts, dampings and perhaps a set of resonances chosen by the user (one-resonance normal form).
+
+This is done via the computation of a canonical transformation 
+%
+%]|Expr|[#b @`b___})b O# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|$^: M(#""*|:"i,K1}_:!,F:",]:!-<exp<c!$1^$^<c$5Q^:"G}^i_}$^: M|
+%|^:"i_:!-<exp<c!$1(":",M$^<c$5Q^G}^i_}}: ;bP;/":!;bP8 ,F,]-<exp|
+%|<c!$1^$^<c$5Q^:"G}^i_}: R:!-<exp<c!$1^$^<c$5Q^:"K}^1_}'b M:!-<|
+%|exp<c!$1^$^<c$5Q^:"K}(#i,M1}_}:!-<exp<c!$1^$^<c$5Q^:"F}^i_}:!-<|
+%|exp<c!$1(":",M$^<c$5Q^G}^i_}}: ;bP;/":!;bP8 ,F,]: R:!-<exp<c!$1|
+%|^$^<c$5Q^:"K}^1_}'b M:!-<exp<c!$1^$^<c$5Q^:"K}^i_}:!-<exp<c!$1|
+%|^$^<c$5Q^:"F}(#i,K1}_}:! : -;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} {{\cal M}}_{i+1}&=
+\exp\left({{\widehat{G}}_{i}}\right){{\cal M}}_{i}\exp\left({-{\widehat{G}}_{i}}\right)\nonumber \\
+ &=\exp\left({{\widehat{G}}_{i}}\right){\cal R}\exp\left({{\widehat{K}}_{1}}\right)\cdots\exp\left({{\widehat{K}}_{i-1}}\right)\exp\left({{\widehat{F}}_{i}}\right)\exp\left({-{\widehat{G}}_{i}}\right)\nonumber \\
+ &={\cal R}\exp\left({{\widehat{K}}_{1}}\right)\cdots\exp\left({{\widehat{K}}_{i}}\right)\exp\left({{\widehat{F}}_{i+1}}\right) \end{align}
+
+
+
+
+In the normal form algorithm, ${{\widehat{F}}_{i}}$  are  computed via a logarithm at line !\#7  and put in a spin eigenbasis at line !\#8.
+
+
+ ${{\widehat{G}}_{i}}$  and ${{\widehat{K}}_{i}}$  are computed interatively in lines  !\#9, !\#10, !\#11 and !\#12. 
+
+The final form of the normalized map after the interative loop is:
+%
+%]|Expr|[#b @`b___})># b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|$^: M(#""*|:"no,K1}_:!,F:",]:!-<exp<c!$1^$^<c$5Q^:"G}(!no}_}'b M|
+%|:!-<exp<c!$1^$^<c$5Q^:"G}^1_}$^: A^:"2_$^: A^:"1_: M$^A^:"1("|
+%|,M1}$^: A^:"2(",M2}:!-<exp<c!$1(":",M$^<c$5Q^G}^1_}}'b M:!-<exp|
+%|<c!$1(":",M$^<c$5Q^G}(!no}_}}: ;8/<:";bP8eq,Zmno: ;8/=;bP8-;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} {{\cal M}}_{no+1}&=
+\exp\left({{\widehat{G}}_{no}}\right)\cdots\exp\left({{\widehat{G}}_{1}}\right){{\cal A}}_{2}{{\cal A}}_{1}{\cal M}{{\cal A}}_{1}^{-1}{{\cal A}}_{2}^{-2}\exp\left({-{\widehat{G}}_{1}}\right)\cdots\exp\left({-{\widehat{G}}_{no}}\right)\label{eq:mno}\end{align}
+
+%
+%]|Expr|[#b @`b___})4# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|$^: M(#""*|:"no,K1}_:!,F:",]: R:!-<exp<c!$1^$^<c$5Q^:"K}^1_}'b M|
+%|:!-<exp<c!$1^$^<c$5Q^:"K}(!no}_}:! : ;8/<:";bP8eq,Zfinalnom: ;8/=|
+%|;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} {{\cal M}}_{no+1}&=
+{\cal R}\exp\left({{\widehat{K}}_{1}}\right)\cdots\exp\left({{\widehat{K}}_{no}}\right) \label{eq:finalnom}\end{align}
+
+
+This is shown at line !\#14.  When performing perturbation theory, it is natural for the canonical transformation to be in the reverse Dragt-Finn order. As for the kernel part   ${{\widehat{K}}_{i}}$, the order is more arbitrary.
+
+\section{Stochastic map}\label{s:normfinalstoch}
+
+This is done at line !\#17 and is most useful on linear maps. It computes the equilibrium beam sizes  when there are  stochastic fluctuations.
+
+
+\section{Final result}\label{s:normfinal}
+
+\Eq{eq:finalnom} can be rewritten as 
+%
+%]|Expr|[#b @`b___})=# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|$^: M(#""*|:"no,K1}_:!,F:",]: R:!-<exp<c!$1^$^<c$5Q^:"K}^1_}'b M|
+%|:!-<exp<c!$1^$^<c$5Q^:"K}(!no}_}: ;bP;/":!;bP8 ,F,]-<exp<c!$1|
+%|^$^<c$5Q^:"H}^l_}:!-<exp<c!$1^$^<c$5Q^:"H}(!nl}_}: :! : ;8/<:";bP8eq|
+%|,Zfinalnomf: ;8/=;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} {{\cal M}}_{no+1}&=
+{\cal R}\exp\left({{\widehat{K}}_{1}}\right)\cdots\exp\left({{\widehat{K}}_{no}}\right)\nonumber \\
+ &=\exp\left({{\widehat{H}}_{l}}\right)\exp\left({{\widehat{H}}_{nl}}\right) \label{eq:finalnomf}\end{align}
+This is done at line !\#18.
+
+In the symplectic case, in the absence of resonances  in the normal form, the  full map can be represented by ${\widehat{H}}_{}={\widehat{H}}_{l}+{\widehat{H}}_{nl}$. 
+
+ 
+When resonances dominate the phase space, the one-turn map cannot be represented as a single Lie operator but a certain co-moving map sometimes can. This is important in orbital or spin resonance calculations.
+
 \Section{Taylors and Polymorphs}
 \label{s:fundamental}
  
