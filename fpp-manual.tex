@@ -90,7 +90,8 @@
 \def\te{https://twikinew.ihep.ac.cn/pubfppptc/Web/Complex_Routines/}
 \def\tf{https://twikinew.ihep.ac.cn/pubfppptc/Web/Linear/}
 %\def\tdemo{https://twikinew.ihep.ac.cn/pubfppptc/Web/My_demo_package/}
- 
+ \newcommand{\dragt}{\mbox{\scriptsize $\begin{matrix}\# \\
+\# \end{matrix}$}}
 
 
 \newcounter{mytable}
@@ -2951,11 +2952,13 @@ This routine  \vn{c_normal_new}, normally, is used with a DA map presumably comp
 A vector field operates on a quaterion as follows:
 
 %
-%]|Expr|[#b @`b___})3# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
-%|<c$5Q^""Times|:"F}q,]<c$%!^"#*|:#F}"$Symbol^:$&c0  /7<c$%!^/1}|
-%|:#&c0!*q ,Kqf:!  : ;8/<:#;bP8hopq0: ;8/=;bP8-;|
+%]|Expr|[#b @`b___})6# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|<c$5Q^""Times|:"F}q,]<c!(A(%<c$%!^"#*|:#F}"$Symbol^:$&c0  /7<c$%!|
+%|^/1}:#&c0!*,K<c$5Q^f}}}q:",]<c$%!^:#F}:$&c0  /7<c$%!^/1}:#&c0!*q|
+%| ,Kqf:!  : ;8/<:#;bP8hopq0: ;8/=;bP8-;|
 %|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
 \begin{align} \widehat{F}q=
+\left\{{\vec{F}\cdot \vec{\nabla }+\widehat{f}}\right\}q=
 \vec{F}\cdot \vec{\nabla }q\ +qf  \label{hopq0}\end{align}
 
 
@@ -3003,14 +3006,15 @@ As for the Lie bracket, we first evaluate the commutator of two  operators $\wid
  
 The answer for $\widehat{G}$ is: 
 %
-%]|Expr|[#b @`b___})b D# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%]|Expr|[#b @`b___})b F# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
 %|""*|:"G:!,F,] <c!,Q(#"#Times|:#F,LH}},]F"$Symbol^:$&c0  /7/1:"&c0!*H|
-%|,MH:$&c0  /7/1:"&c0!*F: ;bP;/":!;bP8 g,F,]<c!=Q(#:#h,Lf}},KF:$&c0  /7|
-%|/1:"&c0!*h,MG:$&c0  /7/1:"&c0!*f:! : ;8/<:!;bP8liebra: ;8/=;bP8-;|
+%|,MH:$&c0  /7/1:"&c0!*F: ;bP;/":!;bP8 g,F,]:#hf,Mfh,KF:$&c0  /7|
+%|/1:"&c0!*h,MH:$&c0  /7/1:"&c0!*f:! : ;8/<:!;bP8liebra: ;8/=;bP8-;|
 %|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
 \begin{align} G&= \left\langle{F,H}\right\rangle=
 F\cdot \nabla H-H\cdot \nabla F\nonumber \\
- g&=\left[{h,f}\right]+F\cdot \nabla h-G\cdot \nabla f \label{liebra}\end{align}
+ g&=hf-fh+F\cdot \nabla h-H\cdot \nabla f \label{liebra}\end{align}
+
 Where the orbital part of the Lie bracket is defined by
 %
 %]|Expr|[#b @`b___})0# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
@@ -4579,7 +4583,7 @@ end type c_linear_map
 
   \section{Normalizing a Hamiltonian representing a ring}\label{s:normh}
 
-{\bf N.B. The general theory is in section 8.4 of reference \cite{thenewbook}. }
+{\bf N.B. The general theory is in sections 8.4, 8.6 and 8.7 of reference \cite{thenewbook}. This theory was developped for orbital motion but is formally identical thanks to our use of vector field operators. }
 
 
 It is possible using the logarithm described in \sref{s:usefulmap} to create a Hamiltonian operator for the ring.  The first step is to normalize the linear part.
@@ -4594,23 +4598,22 @@ It is possible using the logarithm described in \sref{s:usefulmap} to create a H
 %|<c!(A(%$^:"&c0!*z($2a,M1}_$^:#&c0  .V($:"&c0!*2a,M1}_,K$^z("2|
 %|a}_$^:#&c0  .V(":"&c0!*2a}_}}}(":!-<sum}(%:"a,]1,L3}_} }}(!:$damping}|
 %|_}:",K <2^1^2}$^:#&c0  n(!:$&c0!*spin}_:" <c$5Q^j}}}(&:$Linear|
-%| Part  $^<c$5Q^H}^0_}_}:"  :!-<mbox-[-<Large ,D:",K$^<c$5Q^V}|
-%|^:#&c0  q_:!&c0!*,D-]:" : ;8/<:";bP8eq,Zlinham: ;8/=;bP;/":!;bP8 |
-%|,F,] <c%"C^<cY A^<c%#D($$^:#&c0  n^:"&c0!*a_,Z$^J^a_,Z}(#"%Times|:%,M|
-%|:!-<sum}(%:"a,]1,L3}_}}(#:$transverse tunes}_}:" ,K <c%"C^<cY A|
-%|("<c%#D("<2(",M$^:#&c0  a^:"&c0!*a_}("2:#&c0  p}}<c!(A(%$^:"&c0!*z|
-%|($2a,M1}_$^:#&c0  .V($:"&c0!*2a,M1}_,K$^z("2a}_$^:#&c0  .V(":"&c0!*2|
-%|a}_}}}(":!-<sum}(%:"a,]1,L3}_} }}(!:$damping}_}:",K <2^1^2}$^|
-%|:#&c0  n(!:$&c0!*spin}_:" <c$5Q^j}  :!-<mbox-[-<Large ,D:",K$|
-%|^<c$5Q^V}^:#&c0  q_:!&c0!*,D-]:" :! : -;|
+%| Part  $^<c$5Q^"%Times|:%H}^:$0_}_}:"  :!-<mbox-[-<Large ,D:",K|
+%|$^<c$5Q^V}^:#&c0  q_:!&c0!*,D-]:" : ;8/<:";bP8eq,Zlinham: ;8/=|
+%|;bP;/":!;bP8 ,F,] <c%"C^<cY A^<c%#D($$^:#&c0  n^:"&c0!*a_,Z$^|
+%|J^a_,Z}(#:%,M:!-<sum}(%:"a,]1,L3}_}}(#:$transverse tunes}_}:" |
+%|,K <c%"C^<cY A("<c%#D("<2(",M$^:#&c0  a^:"&c0!*a_}("2:#&c0  p}}|
+%|<c!(A(%$^:"&c0!*z($2a,M1}_$^:#&c0  .V($:"&c0!*2a,M1}_,K$^z("2|
+%|a}_$^:#&c0  .V(":"&c0!*2a}_}}}(":!-<sum}(%:"a,]1,L3}_} }}(!:$damping}|
+%|_}:",K <2^1^2}$^:#&c0  n(!:$&c0!*spin}_:" <c$5Q^j}  :!-<mbox-[-<|
+%|Large ,D:",K$^<c$5Q^V}^:#&c0  q_:!&c0!*,D-]:" :! : -;|
 %|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
 \begin{align}  {\widehat{H}}_{\theta }&= \underbrace{\underbrace{-i\sum\limits_{a=
 1,3}^{} {\nu }_{a}\left\{{{z}_{2a-1}{\partial }_{2a-1}-{{z}_{2a}\partial }_{2a}}\right\}}\limits_{{\rm t}{\rm r}{\rm a}{\rm n}{\rm s}{\rm v}{\rm e}{\rm r}{\rm s}{\rm e}~{\rm t}{\rm u}{\rm n}{\rm e}{\rm s}}^{}\ +\ \underbrace{\sum\limits_{a=
-1,3}^{} {-{\alpha }_{a} \over 2\pi }\left\{{{z}_{2a-1}{\partial }_{2a-1}+{z}_{2a}{\partial }_{2a}}\right\}\ }\limits_{{\rm d} {\rm a}{\rm m}{\rm p}{\rm i}{\rm n}{\rm g}}^{}+\ {1 \over 2}{\nu }_{{\rm s}{\rm p}{\rm i}{\rm n}}\ \widehat{j}}\limits_{{\rm L}{\rm i}{\rm n}{\rm e}{\rm a}{\rm r}~{\rm P}{\rm a}{\rm r}{\rm t}~~{\widehat{{\rm H}}}_{{\rm 0}}}^{}\ \ \mbox{\Large $+{\widehat{V}}_{\theta }$}\ \label{eq:linham}\nonumber \\
+1,3}^{} {-{\alpha }_{a} \over 2\pi }\left\{{{z}_{2a-1}{\partial }_{2a-1}+{z}_{2a}{\partial }_{2a}}\right\}\ }\limits_{{\rm d} {\rm a}{\rm m}{\rm p}{\rm i}{\rm n}{\rm g}}^{}+\ {1 \over 2}{\nu }_{{\rm s}{\rm p}{\rm i}{\rm n}}\ \widehat{j}}\limits_{{\rm L}{\rm i}{\rm n}{\rm e}{\rm a}{\rm r}~{\rm P}{\rm a}{\rm r}{\rm t}~~{\widehat{H}}_{{\rm 0}}}^{}\ \ \mbox{\Large $+{\widehat{V}}_{\theta }$}\ \label{eq:linham}\nonumber \\
  &= \underbrace{-\sum\limits_{a=
 1,3}^{} {\nu }_{a}:{J}_{a}:}\limits_{{\rm t}{\rm r}{\rm a}{\rm n}{\rm s}{\rm v}{\rm e}{\rm r}{\rm s}{\rm e}~{\rm t}{\rm u}{\rm n}{\rm e}{\rm s}}^{}\ +\ \underbrace{\sum\limits_{a=
 1,3}^{} {-{\alpha }_{a} \over 2\pi }\left\{{{z}_{2a-1}{\partial }_{2a-1}+{z}_{2a}{\partial }_{2a}}\right\}\ }\limits_{{\rm d} {\rm a}{\rm m}{\rm p}{\rm i}{\rm n}{\rm g}}^{}+\ {1 \over 2}{\nu }_{{\rm s}{\rm p}{\rm i}{\rm n}}\ \widehat{j}\ \ \mbox{\Large $+{\widehat{V}}_{\theta }$}\  \end{align}
-
 
 
 
@@ -4618,13 +4621,13 @@ The Hamiltonian in \Eq{eq:linham} can be obtained via a Twiss loop as described 
 
 \begin{enumerate}
 \item  The Hamiltonian of \Eq{eq:linham} is in term of an angle $\theta$ running from $0$ to $2\pi $. In textbooks, there is always an assumption that $\theta$ must be related to some continuous $s$ and/or the Courant-Snyder phase advance. This is not necessary. There is an infinite number of ways to relate $\theta $ to an actual position in the ring.
-\item In conjunction with the above comment, special care\footnote{Forest forgot about this and spent a long time looking for an unexisting bug in the example code of this manual.} must be exercised if  zero-length transformations are used. This can be the case for fringe fields or misalignments represented by operators at the ends of magnets. It is also the case if a user  used thin leans multipoles.
-\item It also follows that the total tunes ${\nu }_i $ can have an absolutely arbitrary integer part. In the example of this manual,  we demonstrate this. In general, one has to be careful.
+\item In conjunction with the above comment, special care\footnote{Forest forgot about this and spent a long time looking for an unexisting bug in the example code of this manual.} must be exercised if  zero-length transformations are used. This can be the case for fringe fields or misalignments represented by operators at the ends of magnets. It is also the case if one uses  thin lens multipoles.
+\item It also follows that the total tunes ${\nu }_i $ can have an absolutely arbitrary integer part. In the example of this manual,  we demonstrate this. In general, one has to be careful in selecting the integer part.
 \end{enumerate}
 
-\subsection{Computation of  ${\widehat{{\rm H}}}_{{\rm 0}}$ and ${\widehat{H}}_{\theta }$ }\label{s:fullh}
+\subsection{Computation of  ${\widehat{{ H}}}_{{\rm 0}}$ and ${\widehat{H}}_{\theta }$ }\label{s:fullh}
 
-We start with the fundamental Twiss loop explained in \cite{thenewbook}. Here $i$ and $i+1$ are positions in the ring, normally successive integration steps. But this is arbitrary. If there are $n$ such steps around the ring, the the phase advance per step with be ${1/n}^{th}$ of the total tune.
+We start with the fundamental Twiss loop explained in \cite{thenewbook}. Here $i$ and $i+1$ are positions in the ring, normally successive integration steps. But this is arbitrary. If there are $n$ such steps around the ring, the  phase advance per step will be ${1/n}^{th}$ of the total tune.
 %
 %]|Expr|[#b @`b___})/# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
 %|$^A(#i,K1}_,F,]<c%"C^<cY A(#$^""*|:"L(%i i,K1}_"#Symbol^:#&c0  .P|
@@ -4633,17 +4636,14 @@ We start with the fundamental Twiss loop explained in \cite{thenewbook}. Here $i
 %|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
 \begin{align} {A}_{i+1}&=\underbrace{{L}_{i\ i+1}\circ {A}_{i}}\limits_{from\ tracking}^{}\circ {R}_{i\ i+1}^{-1}\ \label{eq:phaseadloop} \end{align}
 
-In a standard Twiss, we know that ${A}_{i+1}$ should be in a standard form, say Courant-Snyder, we the rotate  the result of tracking the initial $A_i$ unti the tracked result  ${L}_{i\ i+1}\circ {A}_{i}$ has the Courant-Snyder form. Here ${L}_{i\ i+1}$ is the linear part of the tracked map.
+In a standard Twiss, we know that ${A}_{i+1}$ should be in a standard form, say Courant-Snyder, we then rotate  the result of tracking the initial $A_i$ until $A_{i+1}$ has the Courant-Snyder form. Here ${L}_{i\ i+1}$ is the linear part of the tracked map.
 
-Here, we do the opposite:  we assume that the rotation is  ${1/n}^{th}$ of the total tune and we then determine $A_{i+1}$ which is certainly not in a Courant-Snyder form. This is explained in chapter 8 ofthe blue book\cite{thenewbook}.
+Here, we do the opposite:  we assume that the rotation is  ${1/n}^{th}$ of the total tune and we then determine $A_{i+1}$ which is certainly not in a Courant-Snyder form. This is explained in chapter 8 ofthe blue book\cite{thenewbook}. In standard textbooks, like that of S.Y. Lee\cite{sybook}, it is done via generating functions: this completely fails if we need to introduce quaternions and/or radiation damping. In the present of damping, the map ${R}_{i\ i+1}$ is a rotating sink.
 
 
 Now let us apply \Eq{eq:phaseadloop} to the full nonlinear map.  If we track with order higher than one, then \Eq{eq:phaseadloop} becomes:
 
 
-
-
-The idea is to apply \Eq{eq:phaseadloop} to the full map tracked from position  $i$ to $i+1$:
 %
 %]|Expr|[#b @`b___})3# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
 %|""Times|:"U:!,]$^"#*|:#R(%i i,K1}_"$Symbol^:$&c0  .P$^:#&c0!*N|
@@ -4678,21 +4678,24 @@ which is the missing part of \Eq{eq:linham}. Notice that the logarithm is almost
 
 \subsection{Fourier transformation of  ${\widehat{H}}_{\theta }$ }\label{s:foufullh}
 
- 
 %
 %]|Expr|[#b @`b___})b N# b'4" Chicago^: ;bP8&c0!*.["!Helvetica|:! |
-%|""Monaco^:"if    $^<c$5Q^"#*|:#H}^"$Symbol^:$&c0  q_:!&c0!*,F,]|
+%|""Monaco^:"if    $^<c$5Q^"#*|:#V}^"$Symbol^:$&c0  q_:!&c0!*,F,]|
 %|<c%#D(#-<exp<c!$1(":#ik:$&c0  q}}}(":!&c0!*-<sum}(&:#k,],M$^n|
-%|(!mode}_,L$^n(!mode}_}_}$^<c$5Q^H}^k_ : ;8/<:#;bP8eq,Zfout1: ;8/=|
-%|:$;bP8 :!-<-<:$ :! :"then $^<c$5Q^:#H}^k_:!,F,]<2^1("2:$&c0  p}}|
-%|<c%#D(%:!&c0!*-<exp<c!$1(#:#,Mik:$&c0  q}}:#&c0!* $^<c$5Q^H}^|
-%|:$&c0  q_}($:!&c0!*-<sum }(%:#j,]1,L$^n^s_}_}:"   where  :$&c0  q|
-%|:#&c0!*,]j<2("2:$&c0  p}^$^:#&c0!*n^s_}: ;8/<:#;bP8eq,Zfout2: ;8/=|
-%|:!;bP8 : .K}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
-\begin{subequations}\begin{align} {\rm i}{\rm f}~~~~{\widehat{H}}_{\theta }&=\sum\limits_{k=
--{n}_{mode},{n}_{mode}}^{} \exp\left({ik\theta }\right){\widehat{H}}_{k}\ \label{eq:fout1} \\  {\rm t}{\rm h}{\rm e}{\rm n}~{\widehat{H}}_{k}&={1 \over 2\pi }\sum \limits_{j=
-1,{n}_{s}}^{} \exp\left({-ik\theta }\right)\ {\widehat{H}}_{\theta }~~~{\rm w}{\rm h}{\rm e}{\rm r}{\rm e}~~\theta =
+%|(!mode}_,L$^n(!mode}_}_}$^<c$5Q^V}^k_ : ;8/<:#;bP8eq,Zfout1: ;8/=|
+%|:$;bP8 :!-<-<:$ :! :"then $^<c$5Q^:#V}^k_:!,F,]<2^1("2:$&c0  p}}|
+%|<c%#D)%# b'4:!&c0!*-<exp<c!$1(#:#,Mik:$&c0  q}}:#&c0!* $^<c$5Q|
+%|^V}^:$&c0  q_}& b!( b"0 b#8 b$@ b%H b&P!WW}(#:!&c0!*-<sum }(%|
+%|:#j,]1,L$^n^s_}_}:"   where  :$&c0  q:#&c0!*,]j<2("2:$&c0  p}|
+%|^$^:#&c0!*n^s_}: ;8/<:#;bP8eq,Zfout2: ;8/=:!;bP8 : .K|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{subequations}\begin{align} {\rm i}{\rm f}~~~~{\widehat{V}}_{\theta }&=\sum\limits_{k=
+-{n}_{mode},{n}_{mode}}^{} \exp\left({ik\theta }\right){\widehat{V}}_{k}\ \label{eq:fout1} \\  {\rm t}{\rm h}{\rm e}{\rm n}~{\widehat{V}}_{k}&={1 \over 2\pi }\sum \limits_{j=
+1,{n}_{s}}^{} \exp\left({-ik\theta }\right)\ {\widehat{V}}_{\theta }~~~{\rm w}{\rm h}{\rm e}{\rm r}{\rm e}~~\theta =
 j{2\pi  \over {n}_{s}}\label{eq:fout2} \end{align}\end{subequations}
+
+
+Below is code fragment for the Fourier transform of ${\widehat{H}}_{\theta }$ which is the sum of  the linear part ${\widehat{H}}_{0 }$ and the Fourier transform of ${\widehat{V}}_{\theta }$:
 
 \begin{code}
 
@@ -4706,231 +4709,529 @@ enddo
 
 \end{code}
 
-As pointed out before, if there are thin lens objects or entire objects that can be ``skipped'' like arcs with near integer phase advance, then the relationship between $\theta $ and the actual position in the ring can be tricky. In the example of this section, the relationship is essentially an ideal distance proportional to $\theta $. This is more or less the textbook case.
+As pointed out before, if there are thin lens objects or entire objects that can be ``skipped'' like arcs with near integer phase advance, then the relationship between $\theta $ and the actual position in the ring can be tricky. In the example of this section, the relationship is essentially an ideal distance proportional to $\theta $. This is more or less the textbook case as in reference \cite{sybook}.
 
 
-\subsection{Transforming  ${\widehat{H}}_{\theta }$ by a Lie map $\exp\left({{\widehat{F}}_{\theta }}\right) $  }\label{s:foucant}
-
-We need to transform the $\theta $ dependent operator ${\widehat{H}}_{\theta }$ by a $\theta $ depedent periodic transformation. If we use Lie operators, the answer does not depend on the actual form of the Lie operator. So the results of equations 8.28 and 8.29 of section 8.7.1 of reference \cite{thenewbook} are correct as is.
-
-Therefore if
-% 
-%]|Expr|[#b @`b___})5# b'4" Chicago^: ;bP8&c0!*-= $^A^"!Symbol^:!&c0  q|
-%|_""Helvetica|:"&c0!*,F,]-<exp<c!$1(#$^<c$%!^F}^:!&c0  q_/7/1}}|
-%|:"&c0!* : ;bP;/":";bP8 "#Monaco^:#where"$Times|:$  $^<c$%!^"%*|:%F}|
-%|^:!&c0  q_:"&c0!*,F,] <c%#D(%-<exp<c!$1($:%i k:!&c0  q}}:%&c0!* |
-%|$^<c$%!^F}_^k}(":"-<sum}(%k,],M$^n(!mode}_,L$^n(!mode}_}_} : ;8/<|
-%|:%;bP8hfnff: ;8/=;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
-\begin{align} {{\cal A}}_{\theta }&=\exp\left({{\vec{F}}_{\theta }\cdot \nabla }\right) \nonumber \\
- {\rm w}{\rm h}{\rm e}{\rm r}{\rm e}\ \ {\vec{F}}_{\theta }&= \sum\limits_{k=-{n}_{mode},{n}_{mode}}^{} \exp\left({i\ k\theta }\right)\ {\vec{F}}^{k} \label{hfnff}\end{align}
-then
-%
-%]|Expr|[#b @`b___})/# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
-%|$^<c$&!^""*|:"K}^"#Symbol^:#&c0  q_:!&c0!*,F,] -<exp<c!$1^$^<c$5Q|
-%|^:"F}^:#&c0  q_}$^<c$5Q^:"&c0!*H}^:#&c0  q_:"&c0!*,M<c%#D("<2|
-%|^$^$^<c$5Q^F}^:#&c0  q__(#:"&c0!*n,M1}("n,A}}<2(":#&c0  .V$^<c$5Q|
-%|^:"&c0!*F}^:#&c0  q_}(#.Vq,Z}}}(":!&c0!*-<sum}(#:"n,]1}^:#&c0  .E}|
-%|: ;8&c0!*/<:";bP8finff: ;8/=;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
-\begin{align} {\hat{K}}_{\theta }&= \exp\left({{\widehat{F}}_{\theta }}\right){\widehat{H}}_{\theta }-\sum\limits_{n=
-1}^{\infty } {{{\widehat{F}}_{\theta }}^{n-1} \over n!}{\partial {\widehat{F}}_{\theta } \over \partial \theta :}\label{finff}\end{align}
-
-In \Eq{finff}, the Lie bracket must be the Lie bracket including the quaternion operator. The normal form proceeds order by order as in any perturbative scheme--- spin or no spin.
 
 \subsection{Useful formulae for evaluating the effect of a vector field via the Lie bracket}\label{s:vecfform}
-
-\subsubsection{ Using a Lie map}\label{s:vecfform1}
-
-
-We first evaluate the commutator of two line operators $\widehat{F}$ and  $\widehat{H}$:
-%
-%]|Expr|[#b @`b___})6# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
-%|<c!=Q(#<c$5Q^""Times|:"F},L<c$5Q^H}}}:!,F,]<c!=Q(5"#*|:#F"$Symbol^:$&c0  /7|
-%|/1:#&c0!*,K:!-<hat-[:#f:!-] ,L:#H:$&c0  /7/1:#&c0!*,K:!-<hat-[|
-%|h-] }}: ;bP;/":!;bP8 ,F,], :#G:$&c0  /7/1:#&c0!*,K:!-<hat-[:#g|
-%|:!-] : ;8/<:#;bP8hopc: ;8/=;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
-\begin{align} \left[{\widehat{F},\widehat{H}}\right]&=\left[{F\cdot \nabla +\hat{f} ,H\cdot \nabla +\hat{h} }\right]\nonumber \\
- &=G\cdot \nabla +\hat{g} \label{hopc}\end{align}
- 
-The answer for $\widehat{G}$ is: 
-%
-%]|Expr|[#b @`b___})b F# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
-%|""*|:"G:!,F,] <c!,Q(#"#Times|:#F,LH}},]F"$Symbol^:$&c0  /7/1:"&c0!*H|
-%|,MH:$&c0  /7/1:"&c0!*F: ;bP;/":!;bP8 g,F,]:#hf,Mfh,KF:$&c0  /7|
-%|/1:"&c0!*h,MG:$&c0  /7/1:"&c0!*f:! : ;8/<:!;bP8liebra: ;8/=;bP8-;|
-%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
-\begin{align} G&= \left\langle{F,H}\right\rangle=
-F\cdot \nabla H-H\cdot \nabla F\nonumber \\
- g&=hf-fh+F\cdot \nabla h-G\cdot \nabla f \label{liebra}\end{align}
-
-Where the orbital part of the Lie bracket is defined by
-%
-%]|Expr|[#b @`b___})0# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
-%|<c!,Q(#""*|:"F,LG}},]$^F^b_<2(""#Symbol^:#&c0  .V:"&c0!*G}(":#&c0  .V|
-%|$^:"&c0!*z^b_}},M$^G^b_<2(":#&c0  .V:"&c0!*F}(":#&c0  .V$^:"&c0!*z|
-%|^b_}}:! : ;8/<:";bP8eq,Zliebrac: ;8/=;bP8-;|
-%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
-\begin{align} \left\langle{F,G}\right\rangle=
-{F}_{b}{\partial G \over \partial {z}_{b}}-{G}_{b}{\partial F \over \partial {z}_{b}} \label{eq:liebrac}\end{align}
-
-
-We can define a generalized Lie bracket between the vectors and the quaternions defining the Lie operators: 
-%
-%]|Expr|[#b @`b___})&# b'4" Chicago^: ;bP8&c0!*-=<c%"C^<cY A(#|
-%|<c!$1(#"!*|:!G,Lg}}""Helvetica|:",]<c!,Q(#<c!$1(#F,Lf}},L<c!$1|
-%|(#H,Lh}}}}}}()"#Monaco^:#FPP,Gs c"$Times|:$-?:#vector:$-?:#field}|
-%|_}: ;8/<:!;bP8liebrafpp: ;8/=;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
-\begin{align}\underbrace{\left({G,g}\right)=\left\langle{\left({F,f}\right),\left({H,h}\right)}\right\rangle}\limits_{{\rm F}{\rm P}{\rm P}'{\rm s}~{\rm c}\_{\rm v}{\rm e}{\rm c}{\rm t}{\rm o}{\rm r}\_{\rm f}{\rm i}{\rm e}{\rm l}{\rm d} }^{}\label{liebrafpp}\end{align}
-
 
 
 \subsubsection{ Using a phase space map}\label{s:vecfform2}
 
 Consider the Lie map $\cal A$ operator associated with the phase space map $A=(a,\alpha)$. It acts on a phase space map $M=(m,q)$  following  the formula:
-%
-%]|Expr|[#b @`b___})0# b'4" Chicago^: ;bP8&c0!*-="!Helvetica
-%|: A<c!$1(#""*|:"m,Lq}}:!,F,]<c!$1(#m:",Lq}}"#Symbol^:#&c0  .P|
-%|<c!$1(#:"&c0!*a,L:#&c0  a}}:"&c0!*,]<c!$1(&:!m:#&c0  .P:"&c0!*a|
-%|,L<c!(A(#q:#&c0  .P:"&c0!*a}}:#&c0  a}}: ;8&c0!*/<:";bP8eq,Zkoopman|
-%|: ;8/=;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
-\begin{align} {\cal A}\left({m,q}\right)&=\left({m,q}\right)\circ \left({a,\alpha }\right)=
-\left({m\circ a,\left\{{q\circ a}\right\}\alpha }\right)\label{eq:koopman}\end{align}
+%%
+%]|Expr|[#b @`b___})1# b'4" Chicago^: ;bP8&c0!*-=A<c!$1(#"!*|:!m|
+%|,Lq}}""Helvetica{*%^:",F,]<c!$1(#m:!,Lq}}"#Symbol^:#&c0  .P<c!$1|
+%|(#:!&c0!*a,L:#&c0  a}}:!&c0!*,]<c!$1(&:"m:#&c0  .P:!&c0!*a,L<c!(A|
+%|(#q:#&c0  .P:!&c0!*a}}:#&c0  a}}: ;8&c0!*/<:!;bP8eq,Zkoopman, |
+%|1: ;8/=;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align}{\cal A}\left({m,q}\right)\&=
+\left({m,q}\right)\circ \left({a,\alpha }\right)=
+\left({m\circ a,\left\{{q\circ a}\right\}\alpha }\right)\label{eq:koopman?1}\end{align}
+
+
 
 
 This is the type of map produced by PTC and created via FPP (type \vn{c_damap}).
 
 %
-How does a vector field $\widehat{F}$    transforme under the map $\cal A$? This has to be done by a similarity transformation:
+How does a vector field $\widehat{H}$    transforms under the map $\cal A$? This has to be done by a similarity transformation:
 %
 %]|Expr|[#b @`b___})6# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
-%|""*|:" : A<c!$1()"#Times|:#F"$Symbol^:$&c0  /7/1:"&c0!*,K:!-<|
-%|hat-[:"f:!-]}}$^: A_(":!,M1},F,]:" <c$4Q^F}:$&c0  /7/1:"&c0!*,K|
-%|:!-<hat-[<c$4Q^:"f}:!-] : ;8/<:";bP8aacts: ;8/=;bP8-;|
+%|""*|:" : A<c!$1()"#Times|:#H"$Symbol^:$&c0  /7/1:"&c0!*,K:!-<|
+%|hat-[:"h:!-]}}$^: A_(":!,M1},F,]:" G:$&c0  /7/1:"&c0!*,K:!-<hat|
+%|-[:"g:!-] : ;8/<:";bP8aactsn: ;8/=;bP8-;|
 %|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
-\begin{align} \ {\cal A}\left({F\cdot \nabla +\hat{f}}\right){{\cal A}}^{-1}&=\ \widetilde{F}\cdot \nabla +\hat{\widetilde{f}} \label{aacts}\end{align}
-%
-The answer for $\widetilde{F}$ and  $\widetilde{f}$ is:
+\begin{align} \ {\cal A}\left({H\cdot \nabla +\hat{h}}\right){{\cal A}}^{-1}&=\ G\cdot \nabla +\hat{g} \label{aactsn}\end{align}
+
+
+
+
+The answer for ${G}$ and  ${g}$ is:
 %
 %]|Expr|[#b @`b___})=# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
-%|$^<c$4Q^""*|:"F}^k_:!,F,]<c!$1(#$^:"F^i_$^"#Symbol^:#&c0  .V^|
-%|:"&c0!*i_$^a^k(",M1}}}:#&c0  .P:"&c0!*a: ;bP;/":!;bP8 :" <c$4Q|
-%|^:!f} ,F,]<c!$1(#$^<c$4Q^:"F}^k_$^:#&c0  .V^:"&c0!*k_$^:#&c0  a|
-%|_(":"&c0!*,M1}}}:#&c0  a:"&c0!*,K$^:#&c0  a_(":"&c0!*,M1}f:#&c0  .P|
-%|:"&c0!*a :#&c0  a:!&c0!* : ;8/<:";bP8eq,Ztransfgrag: ;8/=;bP8-;|
+%|$^""*|:"G^k_:!,F,]<c!$1(#$^:"H^i_$^"#Symbol^:#&c0  .V^:"&c0!*i|
+%|_$^a^k(",M1}}}:#&c0  .P:"&c0!*a: ;bP;/":!;bP8 :" :!g ,F,]<c!$1|
+%|(#$^:"G^k_$^:#&c0  .V^:"&c0!*k_$^:#&c0  a_(":"&c0!*,M1}}}:#&c0  a|
+%|:"&c0!*,K$^:#&c0  a_(":"&c0!*,M1}h:#&c0  .P:"&c0!*a :#&c0  a:!&c0!* |
+%|: ;8/<:";bP8eq,Ztransfgragn: ;8/=;bP8-;|
 %|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
-\begin{align} {\widetilde{F}}_{k}&=\left({{F}_{i}{\partial }_{i}{a}_{k}^{-1}}\right)\circ a\nonumber \\
- \ \widetilde{f} &=\left({{\widetilde{F}}_{k}{\partial }_{k}{\alpha }^{-1}}\right)\alpha +{\alpha }^{-1}f\circ a\ \alpha  \label{eq:transfgrag}\end{align}
-
+\begin{align} {G}_{k}&=\left({{H}_{i}{\partial }_{i}{a}_{k}^{-1}}\right)\circ a\nonumber \\
+ \ g &=\left({{G}_{k}{\partial }_{k}{\alpha }^{-1}}\right)\alpha +{\alpha }^{-1}h\circ a\ \alpha  \label{eq:transfgragn}\end{align}
 
 %
 
-This is not proven anywhere in the literature. The orbital part can be found in accelerator texts books, Michelotti and Forest for example. It is a standard result of mathematical physics.
+This is not proven anywhere in the literature. The orbital part can be found in accelerator texts books, Michelotti and Forest for example. It is a standard result of mathematical physics. \Eq{eq:transfgragn} is fully implemented in FPP.
 
-\subsection{Transforming the equations of motions}\label{sec:g:t}
 
-As you all know by now, any decent package should use general vector fields. Therefore, I ought to Fourier transform the force field, i.e., the plain logarithm of the map as in \Eq{lognjf}. Then \Eq{hnfor19} simply reads as
+\subsubsection{ Using a Lie map}\label{s:vecfform1}
+
+We first assume that $\cal A$ of \Eq{aactsn} is given by:
 %
-%]|Expr|[#b @`b___})*# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
-%|$^<c$%!^""*|:"G}_^k:!,F,]<c%#D)!# b'4<c%"C^<cY A)(# b'4:",M<2|
-%|^1^C}:!-<exp<c!$1(#,Mik$^"#Symbol^:#&c0  q(#:"&c0!*j,K1}_}}:!-<|
-%|log<c!$1)!# b'4$^:"N(%j j,K1}_}& b!( b"0 b#8 b$@ b%H b&P!WW}}|
-%|}& b!( b"0 b#8 b$@ b%H b&P!WW}}(/"$Monaco^:$line ,H18,I in Appendix|
-%| :!-<ref-[aguignardn-]}_}}& b!( b"0 b#8 b$@ b%H b&P!WW}("-<sum}|
-%|(#:"j,]0}(#N,M1}}: ;8/<:";bP8hnfof: ;8/=:!;bP8 : -;|
+%]|Expr|[#b @`b___}).# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|: A:!,F,]-<exp<c!$1^<c$5Q^""*|:"F}},]:! -<exp<c!$1(%:"F"#Symbol^:#&c0  /7|
+%|/1:"&c0!*,K<c$5Q^f}}}:! : -;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} {\cal A}&=\exp\left({\widehat{F}}\right)=
+ \exp\left({F\cdot \nabla +\widehat{f}}\right) \end{align}
+
+Then by standard operator theory, we have:
+%
+%
+%]|Expr|[#b @`b___})b I# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|""*|:"   G"#Symbol^:#&c0  /7/1:"&c0!*,K:!-<hat-[:"g:!-],F,]-<|
+%|exp<c!$1(#: ,Z<c$5Q^:"F}: ,Z}}<c$5Q^:"H},]<c%#D^<2^$(#: ,Z<c$5Q|
+%|^:"F}: ,Z}_^:"n("n,A}}(":!-<sum}(#:"n,]0}^:#&c0  .E}<c$5Q^:"&c0!*H}|
+%| "$Monaco^:$ where : ,Z<c$5Q^:"F}: ,Z<c$5Q^:"H},]<c!=Q(#<c$5Q|
+%|^F},L<c$5Q^H}}},]<c$5Q^<c!,Q(#F,LH}}}    : ;8/<:";bP8aactsn, |
+%|1: ;8/=;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} \ \ \ G\cdot \nabla +\hat{g}&=\exp\left({\dragt
+\widehat{F}\dragt
+}\right)\widehat{H}=
+\sum\limits_{n=
+0}^{\infty } {{\dragt
+\widehat{F}\dragt
+}^{n} \over n!}\widehat{H}\ ~{\rm w}{\rm h}{\rm e}{\rm r}{\rm e}~\dragt
+\widehat{F}\dragt
+\widehat{H}=
+\left[{\widehat{F},\widehat{H}}\right]=
+\widehat{\left\langle{F,H}\right\rangle}\ \ \ \ \label{aactsn?1}\end{align}
+
+
+We must  evaluate the commutator of the  Lie operators $\widehat{F}$ and  $\widehat{H}$ in terms of their Lie bracket ${\left\langle{F,H}\right\rangle}$:
+%
+%]|Expr|[#b @`b___})7# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|<c!=Q(#<c$5Q^""Times|:"F},L<c$5Q^H}}}:!,F,]<c!=Q(5"#*|:#F"$Symbol^:$&c0  /7|
+%|/1:#&c0!*,K:!-<hat-[:#f:!-] ,L:#H:$&c0  /7/1:#&c0!*,K:!-<hat-[|
+%|h-] }}: ;bP;/":!;bP8 ,F,]:#K:$&c0  /7/1:#&c0!*,K:!-<hat-[:#k:!-]|
+%| : ;8/<:#;bP8hopc, 1: ;8/=;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} \left[{\widehat{F},\widehat{H}}\right]&=\left[{F\cdot \nabla +\hat{f} ,H\cdot \nabla +\hat{h} }\right]\nonumber \\
+ &=K\cdot \nabla +\hat{k} \label{hopc?1}\end{align}
+
+
+The answer for $\widehat{K}$ is: 
+%
+%]|Expr|[#b @`b___})b G# b'4" Chicago^: ;bP8&c0!*-="!*|:! K""Helvetica|:",F,]|
+%| <c!,Q(#"#Times|:#F,LH}},]F"$Symbol^:$&c0  /7/1:!&c0!*H,MH:$&c0  /7|
+%|/1:!&c0!*F: ;bP;/":";bP8 k,F,]:#hf,Mfh,KF:$&c0  /7/1:!&c0!*h,M|
+%|H:$&c0  /7/1:!&c0!*f:" : ;8/<:";bP8liebra, 1: ;8/=;bP8-;|
 %|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
-\begin{align} {\vec{G}}^{k}&=\sum\limits_{j=
-0}^{N-1} \underbrace{-{1 \over C}\exp\left({-ik{\theta }_{j+1}}\right)\log\left({{N}_{j\ j+1}}\right)}\limits_{{\rm l}{\rm i}{\rm n}{\rm e}~({\rm 1}{\rm 8})~{\rm i}{\rm n}~{\rm A}{\rm p}{\rm p}{\rm e}{\rm n}{\rm d} {\rm i}{\rm x}~\ref{aguignardn}}^{}\label{hnfof} \end{align}
+\begin{align}\ K&= \left\langle{F,H}\right\rangle=
+F\cdot \nabla H-H\cdot \nabla F\nonumber \\
+ k&=hf-fh+F\cdot \nabla h-H\cdot \nabla f \label{liebra1}\end{align}
+
+
+Where the orbital part of the Lie bracket can be written as:
 %
-and the $\theta $ dependent force is given by the inverse transform:
+%]|Expr|[#b @`b___})3# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|K,]<c!,Q(#""*|:"F,LH}},]$^F^b_<2(""#Symbol^:#&c0  .V:"&c0!*H}|
+%|(":#&c0  .V$^:"&c0!*z^b_}},M$^H^b_<2(":#&c0  .V:"&c0!*F}(":#&c0  .V|
+%|$^:"&c0!*z^b_}}:! : ;8/<:";bP8eq,Zliebrac1: ;8/=;bP8-;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} K=\left\langle{F,H}\right\rangle=
+{F}_{b}{\partial H \over \partial {z}_{b}}-{H}_{b}{\partial F \over \partial {z}_{b}} \label{eq:liebrac1}\end{align}
+
+
+In FPP, we define a generalized Lie bracket between the vectors and the quaternions defining the Lie operators: 
+%
+%]|Expr|[#b @`b___})'# b'4" Chicago^: ;bP8&c0!*-=<c%"C^<cY A(#|
+%|<c!$1(#"!*|:!K,Lk}}""Helvetica|:",]<c!,Q(#<c!$1(#F,Lf}},L<c!$1|
+%|(#H,Lh}}}}}}()"#Monaco^:#FPP,Gs c"$Times|:$-?:#vector:$-?:#field}|
+%|_}: ;8/<:!;bP8liebrafpp1: ;8/=;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align}\underbrace{\left({K,k}\right)=\left\langle{\left({F,f}\right),\left({H,h}\right)}\right\rangle}\limits_{{\rm F}{\rm P}{\rm P}'{\rm s}~{\rm c}\_{\rm v}{\rm e}{\rm c}{\rm t}{\rm o}{\rm r}\_{\rm f}{\rm i}{\rm e}{\rm l}{\rm d} }^{}\label{liebrafpp1}\end{align}
+
+
+
+
+\subsection{Transforming  ${\widehat{H}}_{\theta }$ by a Lie map $\exp\left({{\widehat{F}}_{\theta }}\right) $  }\label{s:foucant}
+
+We need to transform the $\theta $ dependent operator ${\widehat{H}}_{\theta }$ by a $\theta $ depedent periodic transformation where  $\theta $ measures a position around a ring typically. If we use Lie operators, the answer does not depend on the actual form of the Lie operator. So the results of equations 8.28 and 8.29 of section 8.7.1 of reference \cite{thenewbook} are correct as is.
+
+Therefore if
+%
+%]|Expr|[#b @`b___});# b'4" Chicago^: ;bP8&c0!*-= $^A^"!Symbol^:!&c0  q|
+%|_""Helvetica|:"&c0!*,F,]-<exp<c!$1)!# b'4$^<c$%Q^F}^:!&c0  q_|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}}"#Monaco^:#&c0!*   where   $^<c$%Q|
+%|^:"F}^:!&c0  q_"$*|:$&c0!*,]$^<c$%!^:"F}^:!&c0  q_/7/1:$&c0!* |
+%|,K $^<c$5Q^f}^:!&c0  q_:"&c0!* : ;8/<:$;bP8hfnff: ;8/=;bP8-;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} {{\cal A}}_{\theta }&=\exp\left({{\widehat{F}}_{\theta }}\right)~~~{\rm w}{\rm h}{\rm e}{\rm r}{\rm e}~~~{\widehat{F}}_{\theta }=
+{\vec{F}}_{\theta }\cdot \nabla \ +\ {\widehat{f}}_{\theta } \label{hfnff}\end{align}
+%
+then
+%
+%]|Expr|[#b @`b___})b I# b'4" Chicago^: ;bP8&c0!*.["!Helvetica|:! |
+%|$^<c$&!^""*|:"K}^"#Symbol^:#&c0  q_:!&c0!*,F,] -<exp<c!$1(#: ,Z|
+%|$^<c$5Q^:"F}^:#&c0  q_: &c0!*,Z}}$^<c$5Q^:"H}^:#&c0  q_:"&c0!*,M|
+%|<c%#D("<2^$(#: ,Z$^<c$5Q^:"F}^:#&c0  q_: &c0!*,Z}_(#:"n,M1}("|
+%|n,A}}<2(":#&c0  .V$^<c$5Q^:"&c0!*F}^:#&c0  q_}(".Vq}}}(":!&c0!*-<|
+%|sum}(#:"n,]1}^:#&c0  .E}:"&c0!* : ;8/<:";bP8finff0: ;8/=:!;bP8-<-<|
+%|:# :! ,F,] -<exp<c!$1(#: ,Z$^<c$5Q^:"F}^:#&c0  q_: &c0!*,Z}}$|
+%|^<c$5Q^:"H}^0_,K   :!-<exp<c!$1(#: ,Z$^<c$5Q^:"F}^:#&c0  q_: &c0!*,Z}}|
+%|$^<c$5Q^:"V}^:#&c0  q_:"&c0!*,M<c%#D("<2^$(#: ,Z$^<c$5Q^:"F}^|
+%|:#&c0  q_: &c0!*,Z}_(#:"n,M1}("n,A}}<2(":#&c0  .V$^<c$5Q^:"&c0!*F}|
+%|^:#&c0  q_}(".Vq}}}(":!&c0!*-<sum}(#:"n,]1}^:#&c0  .E}:"&c0!* |
+%|: ;8/<:";bP8finff: ;8/=:!;bP8 : .K}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{subequations}\begin{align} {\hat{K}}_{\theta }&= \exp\left({\dragt
+{\widehat{F}}_{\theta }\dragt
+}\right){\widehat{H}}_{\theta }-\sum\limits_{n=
+1}^{\infty } {{\dragt
+{\widehat{F}}_{\theta }\dragt
+}^{n-1} \over n!}{\partial {\widehat{F}}_{\theta } \over \partial \theta }\ \label{finff0}\\  &= \exp\left({\dragt
+{\widehat{F}}_{\theta }\dragt
+}\right){\widehat{H}}_{0}+\ \ \ \exp\left({\dragt
+{\widehat{F}}_{\theta }\dragt
+}\right){\widehat{V}}_{\theta }-\sum\limits_{n=
+1}^{\infty } {{\dragt
+{\widehat{F}}_{\theta }\dragt
+}^{n-1} \over n!}{\partial {\widehat{F}}_{\theta } \over \partial \theta }\ \label{finff} \end{align}\end{subequations}
+
+%
+where
+%
+%]|Expr|[#b @`b___})b Y# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|<c%"C^<cY A(%: ,Z$^<c$5Q^""*|:"F}^"#Symbol^:#&c0  q_: &c0!*,Z|
+%|:" $^<c$5Q^H}^:#&c0  q_}}(%"$Monaco^:$&c0!*Dragt,Gs notation}|
+%|_}:!,F,]:"ad$^<c$5Q^F}^:#&c0  q_:"&c0!* $^<c$5Q^H}^:#&c0  q_:"&c0!* |
+%|,]$^<c$5Q^F}^:#&c0  q_:"&c0!* $^<c$5Q^H}^:#&c0  q_:"&c0!* ,M |
+%|$^<c$5Q^H}^:#&c0  q_:"&c0!* $^<c$5Q^F}^:#&c0  q_:"&c0!* : ;bP;/"|
+%|:!;bP8 ,F,]<c$5Q^<c!,Q(#<c!$1(#$^:"F^:#&c0  q_:"&c0!*,L$^f^:#&c0  q|
+%|_}}:"&c0!*,L<c!$1(#$^H^:#&c0  q_:"&c0!*,L$^h^:#&c0  q_}}}}}:"&c0!* |
+%|        :#&c0  .L:"&c0!*   :!-<Eq-[liebrafpp1-]"%Times|:% :$implemented|
+%| in FPP  : ;8/<:";bP8eq,Zaddragt: ;8/=;bP8-;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} \underbrace{\dragt
+{\widehat{F}}_{\theta }\dragt
+\ {\widehat{H}}_{\theta }}\limits_{{\rm D}{\rm r}{\rm a}{\rm g}{\rm t}'{\rm s}~{\rm n}{\rm o}{\rm t}{\rm a}{\rm t}{\rm i}{\rm o}{\rm n}}^{}&=ad{\widehat{F}}_{\theta }\ {\widehat{H}}_{\theta }\ =
+{\widehat{F}}_{\theta }\ {\widehat{H}}_{\theta }\ -\ {\widehat{H}}_{\theta }\ {\widehat{F}}_{\theta }\ \nonumber \\
+ &=\widehat{\left\langle{\left({{F}_{\theta },{f}_{\theta }}\right),\left({{H}_{\theta },{h}_{\theta }}\right)}\right\rangle}\ \ \ \ \ \ \ \ \ \leftarrow \ \ \ \Eq{liebrafpp1}\ {\rm i}{\rm m}{\rm p}{\rm l}{\rm e}{\rm m}{\rm e}{\rm n}{\rm t}{\rm e}{\rm d} ~{\rm i}{\rm n}~{\rm F}{\rm P}{\rm P}~~\label{eq:addragt}\end{align}
+
+
+
+
+In \Eq{finff}, the Lie bracket must be the Lie bracket including the quaternion operator. The normal form proceeds order by order as in any perturbative scheme--- spin or no spin.
+
+In FPP, \Eq{finff} is performed by a call to a subroutine: 
+
+\begin{code}
+       call exp_vector_field_fourier(F_theta,H_theta,H_theta)   
+\end{code}
+
+It makes sense to call the entire operation of \Eq{finff} an ``exponential'' since this equation is derived by ``extending state space'' to include $\theta $ as a state variable. In that case, the normal exponential of a Lie map applies. 
+
+
+\subsection{The actual iterative step of the normal form}\label{sec:itenorm}
+
+For simplicity we do the calculations of this section   in one degree of freedom (1-d-f) and later extend the results to a higher number of dimensions.
+
+We expand \Eq{finff} and retain the leading order terms in $F_{\theta}$ and  $V_{\theta}$. Here $H_0$ is the orbital vector field and $h_0$ is the quaternion part:
+%
+%]|Expr|[#b @`b___})1# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|<c!$1(#$^""Symbol^:"&c0  D^q_"#*|:#&c0!*,L$^:"&c0  d^q_}}:!&c0!*,F,]|
+%|<c!,Q(#<c!$1(#$^:#F^:"&c0  q_:#&c0!*,L$^f^:"&c0  q_}}:#&c0!*,L|
+%|<c!$1(#$^H^0_,L$^h^0_}}}},K<c!$1(#$^V^:"&c0  q_:#&c0!*,L$^v^:"&c0  q|
+%|_}}:#&c0!*,K<c!$1(#<2(":"&c0  .V$^:#&c0!*F^:"&c0  q_}(".Vq}}:#&c0!*,L|
+%|<2(":"&c0  .V$^:#&c0!*f^:"&c0  q_}(".Vq}}}}:#&c0!*:! : ;8/<:#;bP8eq|
+%|,Zlieepand: ;8/=;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} \left({{\Delta }_{\theta },{\delta }_{\theta }}\right)&=\left\langle{\left({{F}_{\theta },{f}_{\theta }}\right),\left({{H}_{0},{h}_{0}}\right)}\right\rangle+\left({{V}_{\theta },{v}_{\theta }}\right)+\left({{\partial {F}_{\theta } \over \partial \theta },{\partial {f}_{\theta } \over \partial \theta }}\right) \label{eq:lieepand}\end{align}
+%
+%
+
+These operators can be Fourier expanded:
+%
+%]|Expr|[#b @`b___});# b'4" Chicago^: ;bP8&c0!*.["!Helvetica|:! |
+%|$^""*|:"F^"#Symbol^:#&c0  q_:!&c0!*,F,]<c!$1)## b'4$^:"F^:#&c0  q|
+%|^:"&c0!*1,L$^F^:#&c0  q^:"&c0!*2}& b!( b"0 b#8 b$@ b%H b&P!WW}}|
+%|"$Monaco^:$      $^:"F^:#&c0  q(#:"&c0!*1,L2},]<c%#D(#$^F(%m,L|
+%|n,Lk}(#1,L2}$^z^1^m$^z^2^n}(":!-<sum}(%:"m,Ln,Lk}_}:!-<exp<c!$1|
+%|(":"ik:#&c0  q}}&c0!* :!-<-<:# $^:"f^:#&c0  q_:!&c0!*,F,]<c%#D|
+%|($$^:"f(%m,Ln,Lk}^'b!L$^z^1^m$^z^2^n$^e_("ik:#&c0  q}}(":!&c0!*-<|
+%|sum}(-:"m,Ln,Lk,L'b!L,],M1,L0,L1}_} $^e^'b!L_:! : .K|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{subequations}\begin{align} {F}_{\theta }&=\left({{F}_{\theta }^{1},{F}_{\theta }^{2}}\right)~~~~~~{F}_{\theta }^{1,2}=
+\sum\limits_{m,n,k}^{} {F}_{m,n,k}^{1,2}{z}_{1}^{m}{z}_{2}^{n}\exp\left({ik\theta }\right) \\ {f}_{\theta }&=\sum\limits_{m,n,k,\ell=
+-1,0,1}^{} {f}_{m,n,k}^{\ell}{z}_{1}^{m}{z}_{2}^{n}{e}^{ik\theta }\ {e}_{\ell} \end{align}\end{subequations}
+and, of course, a similar expansion for the potential operator ${\widehat{V}}_{\theta }$.
+
+The $e_i$'s are eigen-quaternions of the operators made from the original quaternions $q_i$'s: 
+%
+%]|Expr|[#b @`b___})b!&# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|""Monaco^:"if       $^"#*|:#q^i_:!,F,]$^"$Symbol^:$&c0  e(!:#&c0!*ijk}|
+%|_$^q^j_$^q^k_   : ;bP;/":!;bP8,F:"then we define $^"%Times|:%e|
+%|^i_:",Gs as: ;bP;/":!;bP8 $^e^1_,F,]<2^1^2}<c!$1($$^q^1_,Ki$^|
+%|q^3_}}: ;bP;/":!;bP8  $^e^0_,F,] $^q^2_ ,H,]j,I:% : ;bP;/":!;bP8 |
+%|$^e(",M1}_,F,]<2^1^2}<c!$1($$^q^1_,Mi$^q^3_}}  : ;bP;/":!;bP8 |
+%|,F: ;bP;/":!;bP8 :"then :!,F:"  [#! (1<c$5Q^:!j}$^e^1_,]-<hphantom|
+%|-[0-]$^e^1_$^q^2_,M$^q^2_$^e^1_,],Mi$^e^1_}(1<c$5Q^j}$^e^0_,]|
+%|0-<hphantom-[$^e^1_$^q^2_,M$^q^2_$^e^1_,],Mi$^e^0_-]}(.<c$5Q^|
+%|j}$^e(",M1}_,]i$^e(",M1}_-<hphantom-[,M$^q^2_$^e^1_,],Mi$^e("|
+%|,M1}_-]}} : -;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} {\rm i}{\rm f}~~~~~~~{q}_{i}&={\varepsilon }_{ijk}{q}_{j}{q}_{k}\ \ \ \nonumber \\
+&{\rm t}{\rm h}{\rm e}{\rm n}~{\rm w}{\rm e}~{\rm d} {\rm e}{\rm f}{\rm i}{\rm n}{\rm e}~{e}_{i}'{\rm s}~{\rm a}{\rm s}\nonumber \\
+ {e}_{1}&={1 \over 2}\left({{q}_{1}+i{q}_{3}}\right)\nonumber \\
+  {e}_{0}&= {q}_{2} (=j)\ \nonumber \\
+ {e}_{-1}&={1 \over 2}\left({{q}_{1}-i{q}_{3}}\right)  \nonumber \\
+ &\nonumber \\
+ {\rm t}{\rm h}{\rm e}{\rm n}~&~~\begin{array}{c}\widehat{j}{e}_{1}=\hphantom{0}{e}_{1}{q}_{2}-{q}_{2}{e}_{1}=-i{e}_{1}\\
+\widehat{j}{e}_{0}=0\hphantom{{e}_{1}{q}_{2}-{q}_{2}{e}_{1}=-i{e}_{0}}\\
+\widehat{j}{e}_{-1}=i{e}_{-1}\hphantom{-{q}_{2}{e}_{1}=-i{e}_{-1}}\end{array} \end{align}
+
+
+
+We then expand \Eq{eq:lieepand} and separate the orbital and quaternion parts to leading order: 
+%
+%]|Expr|[#b @`b___})b J# b'4" Chicago^: ;bP8&c0!*.["!Helvetica|:! |
+%|$^""Symbol^:"&c0  D^q_:!&c0!*,F,]<c!,Q(#$^F^:"&c0  q_"#*|:#&c0!*,L|
+%|$^H^0_}},M<2(#:"&c0  .V, $^:!&c0!*F^:"&c0  q_}(".Vq}}:#&c0!* |
+%|,K $^V^:"&c0  q_&c0!* : ;8/<:#;bP8eq,ZwhatisF: ;8/=:!;bP8-<-<|
+%|:" :! $^:"&c0  d^q_:!&c0!*,F,]$^h^0_$^f^:"&c0  q_:#&c0!*,M$^:!f|
+%|^:"&c0  q_$^:!&c0!*h^0_,M$^H^0_:"&c0  /7/1$^:#&c0!*f^:"&c0  q|
+%|_:#&c0!* ,K<c%"C^<cY A(% $^F^:"&c0  q_/7/1$^:#&c0!*h^0_}}(",]|
+%|0}_} : ;8/<:#;bP8eq,Zwhatisf: ;8/=;bP8.K|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{subequations}\begin{align} {\Delta }_{\theta }&=\left\langle{{F}_{\theta },{H}_{0}}\right\rangle-{\partial {F}_{\theta } \over \partial \theta }\ +\ {V}_{\theta } \label{eq:whatisF}\\  {\delta }_{\theta }&={h}_{0}{f}_{\theta }-{f}_{\theta }{h}_{0}-{H}_{0}\cdot \nabla {f}_{\theta }\ +\underbrace{\ {F}_{\theta }\cdot \nabla {h}_{0}}\limits_{=
+0}^{}\ \label{eq:whatisf}\end{align}\end{subequations}
+
+We now set the orbital part ${\Delta }_{\theta }$ and spin part   ${\delta }_{\theta }$  to zero and later in \sref{sec:normtypes} discuss whether or not that was foolish. Using \Eq{eq:whatisF} we get:
+
+%
+%]|Expr|[#b @`b___})=# b'4" Chicago^: ;bP8&c0!*.["!Helvetica|:! |
+%|$^""*|:"F(%m,Ln,Lk}(#1,L2}:!,F,] <2(",M$^:"V(%m,Ln,Lk}(#1,L2}}|
+%|(*,Mik,Ki<c!$1(&m,Mn,K $^<c!$1(",M1}}_(#1,L2}}}$^"#Symbol^:#&c0  n|
+%|^:"&c0!*1_,K<2^1("2:#&c0  p}}<c!$1(%:"&c0!*m,Kn,K1}}$^:#&c0  a|
+%|^:"&c0!*1_}}  : ;8/<:";bP8eq,ZthatisF: ;8/=:#;bP8 :!-<-<:# $^|
+%|:"f(%m,Ln,Lk}^'b!L:!,F,] <2(",M$^:"v(%m,Ln,Lk}^'b!L}(-,Mik,Ki|
+%|<c!$1(#m,Mn}}$^:#&c0  n^:"&c0!*1_,K<c!$1(#m,Kn}}<2^$^:#&c0  a|
+%|^:"&c0!*1_("2:#&c0  p}}:"&c0!*,Mi'b!L:#&c0  n}}:"&c0!*  : ;8/<|
+%|:";bP8eq,Zthatisf: ;8/=:!;bP8 : .K}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{subequations}\begin{align} {F}_{m,n,k}^{1,2}&= {-{V}_{m,n,k}^{1,2} \over -ik+i\left({m-n+\ {\left({-1}\right)}^{1,2}}\right){\nu }_{1}+{1 \over 2\pi }\left({m+n+1}\right){\alpha }_{1}}\ \ \label{eq:thatisF} \\ {f}_{m,n,k}^{\ell}&= {-{v}_{m,n,k}^{\ell} \over -ik+i\left({m-n}\right){\nu }_{1}+\left({m+n}\right){{\alpha }_{1} \over 2\pi }-i\ell\nu }\ \ \label{eq:thatisf} \end{align}\end{subequations}
+
+
+
+We can easily guess the general case with $N$ degrees of freedom by introducing a sum over tunes and damping.
+%
+%]|Expr|[#b @`b___})=# b'4" Chicago^: ;bP8&c0!*.["!Helvetica|:! |
+%|$^""*|:"F(%m,Ln,Lk}^j:!,F,] <2(",M$^:"V(%m,Ln,Lk}^j}($,Mik,K<c%#D|
+%|('i<c!$1(&$^m^j_,M$^n^j_,K $^<c!$1(",M1}}_^j}}$^"#Symbol^:#&c0  n|
+%|^:"&c0!*j_,K<2^1("2:#&c0  p}}<c!$1(%$^:"&c0!*m^j_,K$^n^j_,K1}}|
+%|$^:#&c0  a^:"&c0!*j_}(":!-<sum}(%:"j,]1,LN}_}}}  : ;8/<:";bP8eq|
+%|,ZthatisFn: ;8/=:#;bP8 :!-<-<:# $^:"f(%m,Ln,Lk}^'b!L:!,F,] <2|
+%|(",M$^:"v(%m,Ln,Lk}^'b!L}((,Mik,Mi'b!L:#&c0  n:"&c0!*,K<c%#D^|
+%|<c!(A(&i<c!$1(#$^m^j_,M$^n^j_}}$^:#&c0  n^:"&c0!*j_,K<c!$1(#$|
+%|^m^j_,K$^n^j_}}<2^$^:#&c0  a^:"&c0!*j_("2:#&c0  p}}}}(":!&c0!*-<|
+%|sum}(%:"j,]1,LN}_}}}  : ;8/<:";bP8eq,Zthatisfn: ;8/=:!;bP8 : .K|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{subequations}\begin{align} {F}_{m,n,k}^{j}&= {-{V}_{m,n,k}^{j} \over -ik+\sum\limits_{j=
+1,N}^{} i\left({{m}_{j}-{n}_{j}+\ {\left({-1}\right)}^{j}}\right){\nu }_{j}+{1 \over 2\pi }\left({{m}_{j}+{n}_{j}+1}\right){\alpha }_{j}}\ \ \label{eq:thatisFn} \\ {f}_{m,n,k}^{\ell}&= {-{v}_{m,n,k}^{\ell} \over -ik-i\ell\nu +\sum\limits_{j=
+1,N}^{} \left\{{i\left({{m}_{j}-{n}_{j}}\right){\nu }_{j}+\left({{m}_{j}+{n}_{j}}\right){{\alpha }_{j} \over 2\pi }}\right\}}\ \ \label{eq:thatisfn} \end{align}\end{subequations}
+
+\subsection{Types of normal forms}\label{sec:normtypes}
+
+There are broadly two types of normal form: into a rotation or one resonance is left. Damping complicates the situation a little bit. 
+
+\subsubsection{Rotation and sink }\label{sec:normtypes}
+
+In \Eq{eq:thatisFn}, we notice that if 
+%
+%]|Expr|[#b @`b___})6# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|""*|:"k,]0"#Monaco^:# and $^"$Symbol^:$&c0  a^:"&c0!*j_,]0 <c%#D|
+%|(" <c!1!(&$^m^j_,M$^n^j_,K $^<c!$1(",M1}}_^j}}}(":!-<sum}(%:"j|
+%|,]1,LN}_},]0:! : ;8/<:";bP8eq,Ztuneshiftc: ;8/=;bP8-;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} k=
+0~{\rm a}{\rm n}{\rm d} ~{\alpha }_{j}=
+0\ \sum\limits_{j=
+1,N}^{} \ \left|{{m}_{j}-{n}_{j}+\ {\left({-1}\right)}^{j}}\right|=
+0 \label{eq:tuneshiftc}\end{align}
+then the denominator vanishes. In that case, these terms cannot be removed from $H_{\theta}$. These are the so-called tune shifts with amplitude. They are uniquely defined and do not depend on the canonical transformation.
+
+If damping is present, one can remove {\bf everything} and the normal form is simply $H_0$--- a sink.  Whether or not this is a good thing to do is a matter of discussion. If there are resonances or large amount of damping (Van der Pol oscillator for example), we may want to keep tune shift and amplitude dependent terms in the Hamiltonian.   
+
+In the case of the quaternions, if
+ %
+%]|Expr|[#b @`b___})8# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|'b!L,]""*|:"k,]0"#Monaco^:# and $^"$Symbol^:$&c0  a^:"&c0!*j_|
+%|,]0 <c%#D(" <c!1!(#$^m^j_,M$^n^j_}}}(":!-<sum}(%:"j,]1,LN}_},]|
+%|0:! : ;8/<:";bP8eq,Ztuneshiftq: ;8/=;bP8-;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} \ell=k=
+0~{\rm a}{\rm n}{\rm d} ~{\alpha }_{j}=
+0\ \sum\limits_{j=
+1,N}^{} \ \left|{{m}_{j}-{n}_{j}}\right|=
+0 \label{eq:tuneshiftq}\end{align}
+%
+then the quaternion Hamiltonian is proportinal to   $e_0= j$ and the coefficient of proportionality depends on the invariants of the transverse plane.
+
+\subsubsection{One-resonance orbital: simple case to illustrate}\label{sec:normorbit}
+
+Let us assume that the tune is dangerously close to  a third order resonance:
 %
 %]|Expr|[#b @`b___})+# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
-%|<c$%!^""*|:"G}:!,F,] <c%#D(%-<exp<c!$1($:"i k"#Symbol^:#&c0  q}}|
-%|:"&c0!* $^<c$%!^G}_^k}(":!-<sum}(&k,],MM,LM}_} : ;8/<:";bP8hfnf|
-%|: ;8/=;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
-\begin{align} \vec{G}&= \sum\limits_{k=-M,M}^{} \exp\left({i\ k\theta }\right)\ {\vec{G}}^{k} \label{hfnf}\end{align}
-%
-The vector field $\vec G$ is a $\theta $ dependent vector field. It turns out that it transforms under a canonical transformation like the Hamiltonian of 
-\Eq{finf}. Assuming that the canonical transformation is  
-%
-%]|Expr|[#b @`b___})5# b'4" Chicago^: ;bP8&c0!*-= A"!Helvetica|:!,F,]-<|
-%|exp<c!$1(#<c$%!^F}""Symbol^:"&c0  /7/1}}:!&c0!* : ;bP;/":!;bP8 |
-%|"#Monaco^:#where"$Times|:$  <c$%!^"%*|:%F}:!,F,] <c%#D(%-<exp|
-%|<c!$1($:%i k:"&c0  q}}:%&c0!* $^<c$%!^F}_^k}(":!-<sum}(&k,],M|
-%|M,LM}_} : ;8/<:%;bP8hfnff: ;8/=;bP8-;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
-\begin{align} {\cal A}&=\exp\left({\vec{F}\cdot \nabla }\right) \nonumber \\
- {\rm w}{\rm h}{\rm e}{\rm r}{\rm e}\ \ \vec{F}&= \sum\limits_{k=-M,M}^{} \exp\left({i\ k\theta }\right)\ {\vec{F}}^{k} \label{hfnff}\end{align}
-%
-then the new force $\vec K$  is given by:
-%%
-%]|Expr|[#b @`b___})b A# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
-%|<c$%!^""*|:"K}:!,F,] -<exp<c!$1($"#Symbol^:#&c0  :"&c0!*,Z<c$%!|
-%|^F},Z}}<c$%!^G},M<c%#D("<2^$(#,Z<c$%!^F},Z}_(#n,M1}("n,A}}<2("|
-%|:#&c0  .V<c$%!^:"&c0!*F}}(#:#&c0  .Vq,Z}}}(":!&c0!*-<sum}(#:"n|
-%|,]1}^:#&c0  .E}: ;8&c0!*/<:";bP8finff: ;8/=:#;bP8 :!-<-<:# :! |
-%|,F:#&c0  .[<c$%!^:"&c0!*G} ,K<c!,Q(#<c$%!^F},L$^<c$%!^G}^1(#k|
-%|,]0}}},K<2(":#&c0  .V<c$%!^:"&c0!*F}}(":#&c0  .Vq}}:"&c0!* ,K|
-%| "$Monaco^:$Order<c!$1^$^:"F_^2}:! : -;|
+%|""*|:"3$^"#Symbol^:#&c0  n^:"&c0!*1_,]p,K : e:! : -;|
 %|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
-\begin{align} \vec{K}&= \exp\left({:\vec{F}:}\right)\vec{G}-\sum\limits_{n=
-1}^{\infty } {{:\vec{F}:}^{n-1} \over n!}{\partial \vec{F} \over \partial \theta }\label{finff} \\  &\approx \vec{G}\ +\left\langle{\vec{F},{\vec{G}}_{1}^{k=
-0}}\right\rangle-{\partial \vec{F} \over \partial \theta }\ +\ {\rm O}{\rm r}{\rm d} {\rm e}{\rm r}\left({{F}^{2}}\right) \end{align}
+\begin{align} 3{\nu }_{1}=
+p+\ \epsilon  \end{align}
+where 
+$\epsilon $ is a small number.  Then, we have:
 %
-The attentive reader has probably noticed the minus sign between the two terms in \Eq{finff} while there is a plus sign in \Eq{finf} for the Hamiltonian. This is due to the fact that 
-%
-%]|Expr|[#b @`b___})(# b'4" Helvetica|: ;bP8&c0!*,D<c$%!^"!*|:!G}|
-%|""Symbol^:"&c0  /7/1:!&c0!*,],Z,MH,Z: ,D|
+%]|Expr|[#b @`b___})b K# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%| ""Monaco^:"if  "#Times|:#k,]p:"     $^"$*|:$F(%m,Ln,Lk}^j:!,F,]|
+%| <2(",M$^:$V(%m,Ln,Lk}^j}($,Mik,K<c%#D(&i<c!$1(#p,K: e}}:$,K<2|
+%|^1("2"%Symbol^:%&c0  p}}<c!$1(%$^:$&c0!*m^j_,K$^n^j_,K1}}$^:%&c0  a|
+%|^:$&c0!*j_}(":!-<sum}(%:$j,]1,LN}_}}} : ;bP;/":!;bP8,F<c%"C^<cY A|
+%|^:$,]}(%if k,]p}_} :! <2(",M$^:$V(%m,Ln,Lk}^j}($i: e:$,K<c%#D|
+%|(#<2^1("2:%&c0  p}}<c!$1(%$^:$&c0!*m^j_,K$^n^j_,K1}}$^:%&c0  a|
+%|^:$&c0!*j_}(":!-<sum}(%:$j,]1,LN}_}}} ,] :!-<mbox-[-<LARGE ,D|
+%|:$big:!,D-] : ;8/<:$;bP8eq,Zrest: ;8/=;bP8-;|
 %|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
-$\vec{G}\cdot \nabla =
-:-H:$ 
-where $H$ is the Hamiltonian function.
+\begin{align}  {\rm i}{\rm f}~~k=
+p~~~~~{F}_{m,n,k}^{j}&= {-{V}_{m,n,k}^{j} \over -ik+\sum\limits_{j=
+1,N}^{} i\left({p+\epsilon }\right)+{1 \over 2\pi }\left({{m}_{j}+{n}_{j}+1}\right){\alpha }_{j}}\ \nonumber \\
+&\underbrace{=
+}\limits_{if\ k=
+p}^{}\  {-{V}_{m,n,k}^{j} \over i\epsilon +\sum\limits_{j=
+1,N}^{} {1 \over 2\pi }\left({{m}_{j}+{n}_{j}+1}\right){\alpha }_{j}}\ =
+\ \mbox{\LARGE $big$} \label{eq:rest}\end{align}
 
-The vector function  %
-%]|Expr|[#b @`b___})## b'4" Helvetica|: ;bP8&c0!*,D$^<c$%!^"!*|:!G}|
-%|^1(#k,]0}: ,D}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
-${\vec{G}}_{1}^{k=
-0}$
-is the linear part of the constant Fourier mode. Here I have assumed that the linear part of the map has been normalised following the methods of \sref{sec:nuj}. For example, in 1-d-f, the operator %
-%]|Expr|[#b @`b___})%# b'4" Helvetica|: ;bP8&c0!*,D$^<c$%!^"!*|:!G}|
-%|^1(#k,]0}""Symbol^:"&c0  /7/1: &c0!*,D|
-%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
-${\vec{G}}_{1}^{k=
-0}\cdot \nabla $
-is given by:
-%
-%]|Expr|[#b @`b___})=# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
-%|$^<c$%!^""*|:"G}^1(#k,]0}"#Symbol^:#&c0  /7/1:!&c0!*,F,],M"$Times|:$i|
-%|:#&c0  n:"&c0!* <c!(A(%u<2^:#&c0  .V(".V:"&c0!*u}},M<c$%A^u}<2|
-%|^:#&c0  .V(".V<c$%A^:"&c0!*u}}}}}  "%Monaco^:%   where :"u,]x|
-%|,Kip : ;8/<:";bP8g01: ;8/=:!;bP8 : -;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
-\begin{align} {\vec{G}}_{1}^{k=
-0}\cdot \nabla &=-i\nu \ \left\{{u{\partial  \over \partial u}-\overline{u}{\partial  \over \partial \overline{u}}}\right\}\ \ ~~~{\rm w}{\rm h}{\rm e}{\rm r}{\rm e}~u=
-x+ip \label{g01} \end{align}
-%
-%
-Finally it is interesting to give the actual expression for the Lie bracket of two operators  such as $\vec G$:
-%
-%]|Expr|[#b @`b___})0# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
-%|<c!,Q(#<c$%!^""*|:"G},L<c$%!^H}}}:!,F,]<c!,Q($ <c%#D(%-<exp<c!$1|
-%|($:"i k"#Symbol^:#&c0  q}}:"&c0!* $^<c$%!^G}_^k}(":!-<sum}(&k|
-%|,],MM,LM}_}:",L<c%#D(%:!-<exp<c!$1($:"i p:#&c0  q}}:"&c0!* $^|
-%|<c$%!^H}_^p}(":!-<sum}(%p,],MM,LM}_}}} : ;bP;/":!;bP8 ,F:#&c0  .[|
-%|<c%#D(%:!&c0!*-<exp<c!$1($:"i <c!(A($k,Kp}}:#&c0  q}}:"&c0!* |
-%|<c!,Q(#$^<c$%!^G}_^k,L$^<c$%!^H}_^p}}}(":!-<sum}(#<c!1!(#p,Kk}}|
-%|:#&c0  .C:"&c0!*M}_} : ;8/<:";bP8liebragh: ;8/=;bP8-;|
-%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
-\begin{align} \left\langle{\vec{G},\vec{H}}\right\rangle&=\left\langle{ \sum\limits_{k=-M,M}^{} \exp\left({i\ k\theta }\right)\ {\vec{G}}^{k},\sum\limits_{p=-M,M}^{} \exp\left({i\ p\theta }\right)\ {\vec{H}}^{p}}\right\rangle \nonumber \\
- &\approx \sum\limits_{\left|{p+k}\right|\le M}^{} \exp\left({i\ \left\{{k+p}\right\}\theta }\right)\ \left\langle{{\vec{G}}^{k},{\vec{H}}^{p}}\right\rangle \label{liebragh}\end{align}
-%
-\Eq{liebragh} will permit me to evaluate the two terms of \Eq{finff}. The derivative with respect to $\theta $ is trivial:
-%
-%]|Expr|[#b @`b___})+# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
-%|<2("""Symbol^:"&c0  .V<c$%!^"#*|:#&c0!*F}}(":"&c0  .Vq}}:!&c0!*,F,]|
-%|i<c%#D(&:#k:!-<exp<c!$1($:#i k:"&c0  q}}:#&c0!* $^<c$%!^F}_^k}|
-%|(":!-<sum}(&k,],MM,LM}_} : ;8/<:#;bP8hfnfd: ;8/=;bP8-;|
-%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
-\begin{align} {\partial \vec{F} \over \partial \theta }&=i\sum\limits_{k=-M,M}^{} k\exp\left({i\ k\theta }\right)\ {\vec{F}}^{k} \label{hfnfd}\end{align}
-%
-Now onwards with the normalisation!
 
+Thefore we leave the resonant  term in the Hamiltonian and do not attempt the inversion of \Eq{eq:rest}. The resulting normalized Hamiltonian operator has the form:    
+%
+%]|Expr|[#b @`b___})b R# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|$^<c$5Q^""*|:"K}^"#Symbol^:#&c0  q_:!&c0!*,F,] <c%#D(%$^:#&c0  n|
+%|^:"&c0!*a_,H<c$%!^J},I<2(':#&c0  .V:!&c0!*-<hphantom-[$^:#&c0  F|
+%|^:"&c0!*a_:!-]}(":#&c0  .V$^F^:"&c0!*a_}}}(":!-<sum}(%:"a,]1,L|
+%|3}_} ,K<2^1^2}$^:#&c0  n(!"$Monaco^:$&c0!*spin}_:",H<c$%!^J},I|
+%| <c$5Q^j}  : ;bP;/":!;bP8 ,F:",K ,ZV,H<c$%!^J},I:!-<exp<c!$1(#|
+%|i <c!(A(%p:#&c0  q:"&c0!*,M3$^:#&c0  F^:"&c0!*1_}}}},Z ,K ,Z<c$%A|
+%|^V},H<c$%!^J},I:!-<exp<c!$1($:",M:!i <c!(A(%p:#&c0  q:"&c0!*,M|
+%|3$^:#&c0  F^:"&c0!*1_}}}},Z : ;8/<:";bP8eq,Zoneresh: ;8/=;bP8-;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} {\widehat{K}}_{\theta }&= \sum\limits_{a=
+1,3}^{} {\nu }_{a}(\vec{J}){\partial \hphantom{{\Phi }_{a}} \over \partial {\Phi }_{a}}\ +{1 \over 2}{\nu }_{{\rm s}{\rm p}{\rm i}{\rm n}}(\vec{J})\ \widehat{j}\ \ \nonumber \\
+ &+\ :V(\vec{J})\exp\left({i \left\{{p\theta -3{\Phi }_{1}}\right\}}\right):\ +\ :\overline{V}(\vec{J})\exp\left({-i \left\{{p\theta -3{\Phi }_{1}}\right\}}\right):\ \label{eq:oneresh}\end{align}
+%
+In the above equation, $:V:$ denotes the usual Poisson bracket operator of Dragt ( $:V:f = [V,f]$).
+
+
+The $\theta $ dependence of this Hamiltonian can be removed by another transformation, a rotation, of the form:
+%
+%]|Expr|[#b @`b___})4# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|: B:!,F,] -<exp<c!$1(%: ,Z""*|:",M"#Symbol^:#&c0  aq$^:"&c0!*J|
+%|^1_: ,Z}}:",]:!-<exp<c!$1($: ,Z:#&c0  aq<2(&.V:!&c0!*-<hphantom|
+%|-[$^:#&c0  F^:"&c0!*1_:!-]}(":#&c0  .V$^F^:"&c0!*1_}}: ,Z}}:" |
+%|: ;8/<:";bP8eq,Zcomov: ;8/=:!;bP8 : -;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} {\cal B}&= \exp\left({\dragt
+-\alpha \theta {J}_{1}\dragt
+}\right)=
+\exp\left({\dragt
+\alpha \theta {\partial \hphantom{{\Phi }_{1}} \over \partial {\Phi }_{1}}\dragt
+}\right)\ \label{eq:comov} \end{align}
+
+
+We then use  \Eq{finff} to compute the effect of $\cal B$ on the Hamiltonian of \Eq{eq:oneresh}:
+%
+%]|Expr|[#b @`b___})b W# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|$(": B<c$5Q^""*|:"K}}^"#Symbol^:#&c0  q_:!&c0!*,F,] <c%#D(%$^|
+%|:#&c0  n^:"&c0!*a_,H<c$%!^J},I<2(':#&c0  .V:!&c0!*-<hphantom-[|
+%|$^:#&c0  F^:"&c0!*a_:!-]}(":#&c0  .V$^F^:"&c0!*a_}}}(":!-<sum}|
+%|(%:"a,]1,L3}_} ,K<2^1^2}$^:#&c0  n(!"$Monaco^:$&c0!*spin}_:",H|
+%|<c$%!^J},I <c$5Q^j}  : ;bP;/":!;bP8 ,F:",K ,ZV,H<c$%!^J},I:!-<|
+%|exp<c!$1(#i <c!(A(%p:#&c0  q:"&c0!*,M3<c!$1(#$^:#&c0  F^:"&c0!*1|
+%|_,K:#&c0  aq}}}}}}:"&c0!*,Z ,K ,Z<c$%A^V},H<c$%!^J},I:!-<exp<c!$1|
+%|($:",M:!i <c!(A(%p:#&c0  q:"&c0!*,M3<c!$1(#$^:#&c0  F^:"&c0!*1|
+%|_,K:#&c0  aq}}}}}}:"&c0!*,Z : ;bP;/":!;bP8 ,F:",M<c%#D("<2^$($|
+%|: ,Z:#&c0  aq<2(&.V:!&c0!*-<hphantom-[$^:#&c0  F^:"&c0!*1_:!-]}|
+%|(":#&c0  .V$^F^:"&c0!*1_}}: ,Z}_(#:"n,M1}("n,A}}<2(%:#&c0  .V|
+%|:"&c0!*,Z:#&c0  aq<2(&.V:!&c0!*-<hphantom-[$^:#&c0  F^:"&c0!*1|
+%|_:!-]}(":#&c0  .V$^F^:"&c0!*1_}},Z}(":#&c0  .Vq}}}(":!&c0!*-<|
+%|sum}(#:"n,]1}^:#&c0  .E}: ;8&c0!*/<:";bP8eq,Zoneresh: ;8/=;bP8-;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} {{\cal B}\widehat{K}}_{\theta }&= \sum\limits_{a=
+1,3}^{} {\nu }_{a}(\vec{J}){\partial \hphantom{{\Phi }_{a}} \over \partial {\Phi }_{a}}\ +{1 \over 2}{\nu }_{{\rm s}{\rm p}{\rm i}{\rm n}}(\vec{J})\ \widehat{j}\ \ \nonumber \\
+ &+\ :V(\vec{J})\exp\left({i \left\{{p\theta -3\left({{\Phi }_{1}+\alpha \theta }\right)}\right\}}\right):\ +\ :\overline{V}(\vec{J})\exp\left({-i \left\{{p\theta -3\left({{\Phi }_{1}+\alpha \theta }\right)}\right\}}\right):\ \nonumber \\
+ &-\sum\limits_{n=
+1}^{\infty } {{\dragt
+\alpha \theta {\partial \hphantom{{\Phi }_{1}} \over \partial {\Phi }_{1}}\dragt
+}^{n-1} \over n!}{\partial :\alpha \theta {\partial \hphantom{{\Phi }_{1}} \over \partial {\Phi }_{1}}: \over \partial \theta }\label{eq:oneresh}\end{align}
+
+
+We choose $\alpha $ to get rid of the $\theta $ (time) dependence. Clearly the result is:
+%
+%]|Expr|[#b @`b___}))# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|""Symbol^:"&c0  a:!&c0!*,F,]p,O3 : -;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} \alpha &=p/3 \end{align}
+
+As for the last term in the transformation, only the derivative survives since the higher order terms commute  with $\partial \hphantom{ \Phi} \over \partial {\Phi }_1$. Therefore the final result is:\
+% 
+%]|Expr|[#b @`b___})b V# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|$(": B<c$5Q^""*|:"K}}^"#Symbol^:#&c0  q_:!&c0!*,F,] <c%#D(%$^|
+%|:#&c0  n^:"&c0!*a_,H<c$%!^J},I<2(&:#&c0  .V:!&c0!*-<hphantom-[|
+%|$^:#&c0  F^:"&c0!*a_:!-]}(":#&c0  .V$^F^:"&c0!*a_}}}(":!-<sum}|
+%|(%:"a,]1,L3}_} ,K<2^1^2}$^:#&c0  n(!"$Monaco^:$&c0!*spin}_:",H|
+%|<c$%!^J},I <c$5Q^j}  : ;bP;/":!;bP8 ,F:",K ,ZV,H<c$%!^J},I:!-<|
+%|exp<c!$1($:",Mi:!3$^:#&c0  F^:"&c0!*1_}},Z ,K ,Z<c$%A^V},H<c$%!|
+%|^J},I:!-<exp<c!$1(#i3$^:#&c0  F^:"&c0!*1_}},Z ,M<2^p^3}<2(&:#&c0  .V|
+%|:!&c0!*-<hphantom-[$^:#&c0  F^:"&c0!*1_:!-]}(":#&c0  .V$^F^:"&c0!*1|
+%|_}}: ;8/<:";bP8eq,Zonereshc: ;8/=:!;bP8 : -;|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} {{\cal B}\widehat{K}}_{\theta }&= \sum\limits_{a=
+1,3}^{} {\nu }_{a}(\vec{J}){\partial \hphantom{{\Phi }_{a}} \over \partial {\Phi }_{a}}\ +{1 \over 2}{\nu }_{{\rm s}{\rm p}{\rm i}{\rm n}}(\vec{J})\ \widehat{j}\ \ \nonumber \\
+ &+\ :V(\vec{J})\exp\left({-i3{\Phi }_{1}}\right):\ +\ :\overline{V}(\vec{J})\exp\left({i3{\Phi }_{1}}\right):\ -{p \over 3}{\partial \hphantom{{\Phi }_{1}} \over \partial {\Phi }_{1}}\label{eq:onereshc} \end{align}
+
+If we separate the linear part of the tune shift from the nonlinear tunes shift terms, we get the famous co-moving operator form:
+%
+%]|Expr|[#b @`b___})b!D# b'4" Chicago^: ;bP8&c0!*-="!Helvetica|:! |
+%|$(": B<c$5Q^""*|:"K}}^"#Symbol^:#&c0  q_:!&c0!*,F,]<c!(A(#:#&c0  n|
+%|:"&c0!*,K<c%"C^<cY A($$^:#&c0  D^:"&c0!*1_,H<c$%!^J},I}})%# b'4|
+%|$^:#&c0  n^:"&c0!*1_,H<c$%!^J},I,M:#&c0  n|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}_}}}<2(&.V:!&c0!*-<hphantom-[$^|
+%|:#&c0  F^:"&c0!*1_:!-]}(":#&c0  .V$^F^:"&c0!*1_}},K<c%#D(%$^:#&c0  n|
+%|^:"&c0!*a_,H<c$%!^J},I<2(&:#&c0  .V:!&c0!*-<hphantom-[$^:#&c0  F|
+%|^:"&c0!*a_:!-]}(":#&c0  .V$^F^:"&c0!*a_}}}(":!-<sum}(%:"a,]2,L|
+%|3}_} ,K<2^1^2}$^:#&c0  n(!"$Monaco^:$&c0!*spin}_:",H<c$%!^J},I|
+%| <c$5Q^j}  : ;bP;/":!;bP8 ,F:",K ,ZV,H<c$%!^J},I:!-<exp<c!$1($|
+%|:",Mi:!3$^:#&c0  F^:"&c0!*1_}},Z ,K ,Z<c$%A^V},H<c$%!^J},I:!-<|
+%|exp<c!$1(#i3$^:#&c0  F^:"&c0!*1_}},Z ,M<2^p^3}<2(&:#&c0  .V:!&c0!*-<|
+%|hphantom-[$^:#&c0  F^:"&c0!*1_:!-]}(":#&c0  .V$^F^:"&c0!*1_}}|
+%|: ;bP;/":!;bP8 ,F,]<c!(A)## b'4<c%"C^<cY A^<2^: e^:"3}}(%:#&c0  n|
+%|:"&c0!*,Mp,O3}_},K<c%"C^<cY A($$^:#&c0  D^:"&c0!*1_,H<c$%!^J}|
+%|,I}})&# b'4$^:#&c0  n^:"&c0!*1_,H<c$%!^J},I,M:#&c0  n|
+%|}& b!( b"0 b#8 b$@ b%H b&P!WW}_}}& b!( b"0 b#8 b$@ b%H b&P!WW}}|
+%|<2(&.V:!&c0!*-<hphantom-[$^:#&c0  F^:"&c0!*1_:!-]}(":#&c0  .V|
+%|$^F^:"&c0!*1_}},K<c%#D(%$^:#&c0  n^:"&c0!*a_,H<c$%!^J},I<2(&:#&c0  .V|
+%|:!&c0!*-<hphantom-[$^:#&c0  F^:"&c0!*a_:!-]}(":#&c0  .V$^F^:"&c0!*a|
+%|_}}}(":!-<sum}(%:"a,]2,L3}_} ,K<2^1^2}$^:#&c0  n(!:$&c0!*spin}|
+%|_:",H<c$%!^J},I <c$5Q^j}  : ;bP;/":!;bP8 ,F:",K ,ZV,H<c$%!^J}|
+%|,I:!-<exp<c!$1($:",Mi:!3$^:#&c0  F^:"&c0!*1_}},Z ,K ,Z<c$%A^V}|
+%|,H<c$%!^J},I:!-<exp<c!$1(#i3$^:#&c0  F^:"&c0!*1_}},Z: ;8/<:";bP8eq|
+%|,Zonereshcp: ;8/=:!;bP8 : -;}& b!( b"0 b#8 b$@ b%H b&P!WW}]|[
+\begin{align} {{\cal B}\widehat{K}}_{\theta }&=\left\{{\nu +\underbrace{{\Delta }_{1}(\vec{J})}\limits_{{\nu }_{1}(\vec{J})-\nu }^{}}\right\}{\partial \hphantom{{\Phi }_{1}} \over \partial {\Phi }_{1}}+\sum\limits_{a=
+2,3}^{} {\nu }_{a}(\vec{J}){\partial \hphantom{{\Phi }_{a}} \over \partial {\Phi }_{a}}\ +{1 \over 2}{\nu }_{{\rm s}{\rm p}{\rm i}{\rm n}}(\vec{J})\ \widehat{j}\ \ \nonumber \\
+ &+\ :V(\vec{J})\exp\left({-i3{\Phi }_{1}}\right):\ +\ :\overline{V}(\vec{J})\exp\left({i3{\Phi }_{1}}\right):\ -{p \over 3}{\partial \hphantom{{\Phi }_{1}} \over \partial {\Phi }_{1}}\nonumber \\
+ &=\left\{{\underbrace{{\epsilon  \over 3}}\limits_{\nu -p/3}^{}+\underbrace{{\Delta }_{1}(\vec{J})}\limits_{{\nu }_{1}(\vec{J})-\nu }^{}}\right\}{\partial \hphantom{{\Phi }_{1}} \over \partial {\Phi }_{1}}+\sum\limits_{a=
+2,3}^{} {\nu }_{a}(\vec{J}){\partial \hphantom{{\Phi }_{a}} \over \partial {\Phi }_{a}}\ +{1 \over 2}{\nu }_{{\rm s}{\rm p}{\rm i}{\rm n}}(\vec{J})\ \widehat{j}\ \ \nonumber \\
+ &+\ :V(\vec{J})\exp\left({-i3{\Phi }_{1}}\right):\ +\ :\overline{V}(\vec{J})\exp\left({i3{\Phi }_{1}}\right):\label{eq:onereshcp} \end{align}
+
+\Eq{eq:onereshcp} is the final one-resonance normal form in the Hamiltonian frame work. Since it is time independendent it is clear that the following objects are invariants:
+
+\begin{enumerate}
+\item Because ${{\cal B}\widehat{K}}_{\theta }$ is $\theta $ indepedent, it is an invariant. 
+\item The  actions  in the planes perpendicular to the resonance, commute with  ${{\cal B}\widehat{K}}_{\theta }$ , they  are also invariants.
+\end{enumerate}
+
+{\bf  The one-resonance Hamiltonian is not unique. Moreover, the results will always be different from the one-resonance calculation done on a one-turn map. This can be seen on the analytical calculation done in appendix D of reference \cite{suntao}. In a map calculation all the terms proportional to $\cos(3 {{\Phi }_1 })$  are kept. Of course any result expressed in the original variables $x,p_x$ is unique including the invariants in the original space.}
+
+For coupled resonances, the theory is  messier but do not differ in its formal complexity from the one-turn map based theory. The spin resonance theory is intrisically coupled and is discussed in the next section.
+
+\subsubsection{One-resonance spin}\label{sec:normspin}
+
+
+{\bf \Large \color{h} I need to take a rest and relax before surgery.... so this is blank.}
+
+
+
+
+\end{document}
   \section{more...}
 
   
